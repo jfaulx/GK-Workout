@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>The Keeper's Block</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600&display=swap');
+
+  :root {
+    --pitch: #162820;
+    --card: #1c3028;
+    --card2: #223a30;
+    --border: #2d4a3a;
+    --lime: #b7e34d;
+    --gold: #f0c040;
+    --orange: #e8651a;
+    --blue: #4db8e8;
+    --purple: #b07ef5;
+    --white: #f0ede6;
+    --muted: #7a8f7e;
+    --dark: #0f1f18;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background: var(--pitch);
+    color: var(--white);
+    font-family: 'Inter', -apple-system, sans-serif;
+    font-size: 15px;
+    min-height: 100vh;
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: var(--dark);
+    padding: 52px 20px 20px;
+    border-bottom: 2px solid var(--lime);
+  }
+  .eyebrow {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--lime);
+    margin-bottom: 4px;
+  }
+  .title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 36px;
+    font-weight: 800;
+    text-transform: uppercase;
+    line-height: 1;
+    color: var(--white);
+  }
+  .title span { color: var(--lime); }
+  .subtitle { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+
+  /* ── STAT BAR ── */
+  .stats-bar {
+    background: var(--dark);
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--border);
+    gap: 0;
+    scrollbar-width: none;
+  }
+  .stats-bar::-webkit-scrollbar { display: none; }
+  .stat {
+    flex: 0 0 auto;
+    padding: 12px 16px 12px 0;
+    margin-right: 16px;
+    border-right: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .stat:last-child { border-right: none; }
+  .stat-l { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+  .stat-v { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; color: var(--gold); }
+  .stat-u { font-size: 10px; color: var(--muted); }
+
+  /* ── BANNERS ── */
+  .banner {
+    margin: 14px 16px 0;
+    padding: 11px 14px;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 1.6;
+    border-left: 3px solid;
+  }
+  .banner.injury { background: rgba(232,101,26,0.12); border-color: var(--orange); color: #f5c9a0; }
+  .banner.asym   { background: rgba(240,192,64,0.08);  border-color: var(--gold);   color: #f5e0a0; }
+  .banner strong { font-weight: 600; }
+  .banner.injury strong { color: var(--orange); }
+  .banner.asym strong   { color: var(--gold); }
+
+  /* ── WEEK TOGGLE ── */
+  .week-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 16px 0;
+  }
+  .week-lbl { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; }
+  .week-btn {
+    padding: 8px 20px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    min-height: 40px;
+  }
+  .week-btn.on-a { background: var(--lime); color: var(--dark); border-color: var(--lime); }
+  .week-btn.on-b { background: var(--purple); color: var(--dark); border-color: var(--purple); }
+  .week-note { font-size: 11px; color: var(--muted); }
+
+  /* ── DAY TABS ── */
+  .tabs {
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    gap: 8px;
+    padding: 14px 16px 0;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    flex: 0 0 auto;
+    padding: 10px 16px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    white-space: nowrap;
+    -webkit-appearance: none;
+    appearance: none;
+    min-height: 44px;
+  }
+  .tab.active { background: var(--lime); color: var(--dark); border-color: var(--lime); }
+  .tab.gk-tab { border-color: rgba(240,192,64,0.4); color: var(--gold); }
+  .tab.gk-tab.active { background: var(--gold); color: var(--dark); border-color: var(--gold); }
+
+  /* ── PANELS ── */
+  .panel { display: none; padding: 16px 16px 40px; }
+  .panel.active { display: block; }
+
+  .day-hdr { margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+  .day-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--white);
+    line-height: 1;
+  }
+  .gk-panel .day-title { color: var(--gold); }
+  .day-focus { font-size: 11px; color: var(--lime); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 4px; }
+  .gk-panel .day-focus { color: var(--gold); }
+  .day-dur { font-size: 12px; color: var(--muted); margin-top: 6px; }
+  .day-dur strong { color: var(--gold); font-family: 'Barlow Condensed', sans-serif; font-size: 18px; }
+
+  /* ── SECTION LABELS ── */
+  .sec {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 18px 0 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sec::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .sec.cardio { color: var(--blue); }
+  .sec.cardio::after { background: rgba(77,184,232,0.25); }
+
+  /* ── EXERCISE ROWS ── */
+  .ex {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 13px 14px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+    position: relative;
+    transition: opacity 0.2s;
+  }
+  .ex.done { opacity: 0.45; }
+  .ex.done .ex-num { color: var(--lime); }
+  .ex.done::after {
+    content: '✓';
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--lime);
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .ex.compound { border-left: 3px solid var(--lime); }
+  .ex.rehab    { border-left: 3px solid var(--orange); }
+  .ex.gk-ex    { border-left: 3px solid var(--gold); }
+  .ex.cardio-ex{ border-left: 3px solid var(--blue); background: rgba(77,184,232,0.04); }
+
+  .ex-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--muted);
+    min-width: 24px;
+    padding-top: 1px;
+  }
+  .ex-body { flex: 1; min-width: 0; }
+  .ex-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--white);
+    line-height: 1.3;
+    padding-right: 24px;
+  }
+  .ex-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 3px;
+    line-height: 1.4;
+  }
+  .ex-sets {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gold);
+    margin-top: 5px;
+  }
+  .cardio-ex .ex-sets { color: var(--blue); }
+
+  /* tags */
+  .tags { margin-top: 5px; display: flex; flex-wrap: wrap; gap: 4px; }
+  .tag {
+    font-size: 9px;
+    font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 2px;
+  }
+  .tag.t-compound { background: rgba(183,227,77,0.15); color: var(--lime); }
+  .tag.t-rehab    { background: rgba(232,101,26,0.2);  color: var(--orange); }
+  .tag.t-gk       { background: rgba(240,192,64,0.15); color: var(--gold); }
+  .tag.t-core     { background: rgba(100,160,255,0.15);color: #8cb8ff; }
+  .tag.t-cardio   { background: rgba(77,184,232,0.15); color: var(--blue); }
+  .tag.t-fixed    { background: rgba(77,184,232,0.1);  color: var(--blue); }
+  .tag.t-wb       { background: rgba(176,126,245,0.15);color: var(--purple); }
+
+  /* Week B rows */
+  .wb { display: none; }
+  body.weekb .wa { display: none; }
+  body.weekb .wb { display: flex; }
+  .wb .ex-name::after {
+    content: 'WEEK B';
+    font-size: 8px;
+    font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: 1px;
+    background: rgba(176,126,245,0.2);
+    color: var(--purple);
+    padding: 1px 6px;
+    border-radius: 2px;
+    margin-left: 8px;
+    vertical-align: middle;
+    font-weight: 700;
+  }
+
+  /* ── CARDIO BLOCK ── */
+  .cardio-block {
+    background: rgba(77,184,232,0.06);
+    border: 1px solid rgba(77,184,232,0.2);
+    border-radius: 6px;
+    padding: 14px;
+    margin-top: 6px;
+  }
+  .cb-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--blue);
+    margin-bottom: 10px;
+  }
+  .cb-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .cb-stat {
+    background: rgba(77,184,232,0.12);
+    color: var(--blue);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 3px;
+  }
+  .cb-body { font-size: 12px; color: #a8d8ee; line-height: 1.7; }
+  .cb-body strong { color: var(--white); }
+
+  /* ── TIP CARD ── */
+  .tip {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px;
+    margin-top: 14px;
+    font-size: 12px;
+    color: #a8b8a8;
+    line-height: 1.7;
+  }
+  .tip strong { color: var(--white); }
+
+  /* ── LEGEND ── */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px 0 4px;
+  }
+  .leg-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); }
+  .leg-dot { width: 8px; height: 8px; border-radius: 1px; }
+
+  /* ── RESET BTN ── */
+  .reset-row {
+    display: flex;
+    justify-content: flex-end;
+    padding: 14px 0 0;
+  }
+  .reset-btn {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 8px 14px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 4px;
+    cursor: pointer;
+    -webkit-appearance: none;
+    min-height: 36px;
+  }
+
+  /* progress bar */
+  .progress-bar-wrap {
+    background: var(--border);
+    border-radius: 99px;
+    height: 4px;
+    margin: 10px 0 0;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--lime);
+    border-radius: 99px;
+    transition: width 0.3s;
+    width: 0%;
+  }
+  .progress-label {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="eyebrow">InBody-Informed Training Program</div>
+  <div class="title">The <span>Keeper's</span> Block</div>
+  <div class="subtitle">5-Day Goalkeeper Plan &middot; 27yo &middot; 175.4 lbs &middot; 11.4% BF &middot; SMM 89.7 lbs</div>
+</div>
+
+<div class="stats-bar">
+  <div class="stat"><div class="stat-l">Weight</div><div class="stat-v">175.4<span class="stat-u"> lbs</span></div></div>
+  <div class="stat"><div class="stat-l">Muscle</div><div class="stat-v">89.7<span class="stat-u"> lbs</span></div></div>
+  <div class="stat"><div class="stat-l">Body Fat</div><div class="stat-v">11.4<span class="stat-u">%</span></div></div>
+  <div class="stat"><div class="stat-l">BMR</div><div class="stat-v">1892<span class="stat-u"> kcal</span></div></div>
+  <div class="stat"><div class="stat-l">Visceral</div><div class="stat-v">3<span class="stat-u">/10</span></div></div>
+  <div class="stat"><div class="stat-l">SMI</div><div class="stat-v">9.4<span class="stat-u"> kg/m²</span></div></div>
+</div>
+
+<div class="banner injury"><strong>⚠ Injury:</strong> Ankle sprain + quad tear history. All movements use controlled ROM. Consult physio before increasing load on rehab-flagged exercises.</div>
+<div class="banner asym"><strong>📊 Left Side Deficit:</strong> Left Arm 33.8% vs Right 42.7% · Left Leg 76.2% vs Right 78.0%. Always lead with the left side on unilateral work.</div>
+
+<div class="week-bar">
+  <span class="week-lbl">Week:</span>
+  <button class="week-btn on-a" id="btnA" onclick="setWeek('a')">Week A</button>
+  <button class="week-btn" id="btnB" onclick="setWeek('b')">Week B</button>
+  <span class="week-note" id="weekNote">Standard accessories</span>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab(0)">Mon</button>
+  <button class="tab" onclick="switchTab(1)">Tue</button>
+  <button class="tab gk-tab" onclick="switchTab(2)">Wed GK</button>
+  <button class="tab" onclick="switchTab(3)">Thu</button>
+  <button class="tab" onclick="switchTab(4)">Fri</button>
+</div>
+
+<!-- ═══════════════════════════ MONDAY ═══════════════════════════ -->
+<div class="panel active" id="p0">
+  <div class="day-hdr">
+    <div class="day-title">Lower Body Power</div>
+    <div class="day-focus">Bilateral Strength · Quad/Glute · Ankle Rehab · Alactic Cardio</div>
+    <div class="day-dur"><strong>~85 min</strong> total</div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="prog0"></div></div>
+    <div class="progress-label" id="prog0lbl">0 of 0 done</div>
+  </div>
+  <div class="legend">
+    <div class="leg-item"><div class="leg-dot" style="background:var(--lime)"></div>Compound</div>
+    <div class="leg-item"><div class="leg-dot" style="background:var(--orange)"></div>Rehab</div>
+    <div class="leg-item"><div class="leg-dot" style="background:var(--gold)"></div>GK</div>
+    <div class="leg-item"><div class="leg-dot" style="background:var(--blue)"></div>Cardio</div>
+  </div>
+
+  <div class="sec">Warm-Up — 10 min</div>
+  <div class="ex rehab" onclick="toggleDone(this)"><div class="ex-num">W1</div><div class="ex-body"><div class="ex-name">Ankle Alphabet + Banded Dorsiflexion</div><div class="ex-sub">Seated · pain-free ROM only</div><div class="ex-sets">3 × 20</div><div class="tags"><span class="tag t-rehab">Rehab</span></div></div></div>
+  <div class="ex" onclick="toggleDone(this)"><div class="ex-num">W2</div><div class="ex-body"><div class="ex-name">Hip 90/90 + Glute Bridge Hold</div><div class="ex-sub">Floor · controlled breathing</div><div class="ex-sets">2 × 45s</div></div></div>
+  <div class="ex" onclick="toggleDone(this)"><div class="ex-num">W3</div><div class="ex-body"><div class="ex-name">Box Step-Up (bodyweight)</div><div class="ex-sub">12" box · 3 sec eccentric · lead with LEFT leg</div><div class="ex-sets">2 × 8/side</div></div></div>
+
+  <div class="sec">Main Block — 45 min</div>
+  <div class="ex compound" onclick="toggleDone(this)"><div class="ex-num">A1</div><div class="ex-body"><div class="ex-name">Back Squat</div><div class="ex-sub">3-sec descent · full depth if ankle allows</div><div class="ex-sets">4 × 5 @ RPE8</div><div class="tags"><span class="tag t-compound">Compound</span><span class="tag t-fixed">Fixed — don't swap</span></div></div></div>
+  <div class="ex compound" onclick="toggleDone(this)"><div class="ex-num">A2</div><div class="ex-body"><div class="ex-name">Romanian Deadlift (RDL)</div><div class="ex-sub">Hinge · feel hamstring stretch at bottom</div><div class="ex-sets">3 × 8</div><div class="tags"><span class="tag t-compound">Compound</span><span class="tag t-fixed">Fixed — don't swap</span></div></div></div>
+
+  <div class="ex compound wa" onclick="toggleDone(this)"><div class="ex-num">B1</div><div class="ex-body"><div class="ex-name">Bulgarian Split Squat</div><div class="ex-sub">Left leg forward · rear foot elevated</div><div class="ex-sets">3 × 8/side</div><div class="tags"><span class="tag t-compound">Unilateral</span></div></div></div>
+  <div class="ex compound wb" onclick="toggleDone(this)"><div class="ex-num">B1</div><div class="ex-body"><div class="ex-name">Rear-Foot-Elevated Trap Bar Split Squat</div><div class="ex-sub">More stable · heavier load possible</div><div class="ex-sets">3 × 8/side</div><div class="tags"><span class="tag t-wb">Week B</span><span class="tag t-compound">Unilateral</span></div></div></div>
+
+  <div class="ex rehab" onclick="toggleDone(this)"><div class="ex-num">B2</div><div class="ex-body"><div class="ex-name">Terminal Knee Extension (TKE)</div><div class="ex-sub">Band behind knee · focus on VMO activation</div><div class="ex-sets">3 × 15/side</div><div class="tags"><span class="tag t-rehab">Quad Rehab</span><span class="tag t-fixed">Always kept</span></div></div></div>
+
+  <div class="ex compound wa" onclick="toggleDone(this)"><div class="ex-num">C1</div><div class="ex-body"><div class="ex-name">Lateral Banded Walk + Side Step Squat</div><div class="ex-sub">Medium band · stay low</div><div class="ex-sets">3 × 12/side</div><div class="tags"><span class="tag t-gk">GK Pattern</span></div></div></div>
+  <div class="ex compound wb" onclick="toggleDone(this)"><div class="ex-num">C1</div><div class="ex-body"><div class="ex-name">Copenhagen Adductor Plank</div><div class="ex-sub">Side plank · top foot on bench</div><div class="ex-sets">3 × 20s/side</div><div class="tags"><span class="tag t-wb">Week B</span><span class="tag t-gk">GK Pattern</span></div></div></div>
+
+  <div class="ex rehab" onclick="toggleDone(this)"><div class="ex-num">C2</div><div class="ex-body"><div class="ex-name">Single-Leg Calf Raise (on step)</div><div class="ex-sub">3-sec lowering · full ROM when pain-free</div><div class="ex-sets">3 × 12/side</div><div class="tags"><span class="tag t-rehab">Ankle Rehab</span></div></div></div>
+
+  <div class="sec">Finisher — 10 min</div>
+  <div class="ex wa" onclick="toggleDone(this)"><div class="ex-num">F1</div><div class="ex-body"><div class="ex-name">Wall Sit Hold</div><div class="ex-sub">90° · reduce to 30s if quad discomfort</div><div class="ex-sets">3 × 45s</div></div></div>
+  <div class="ex wb" onclick="toggleDone(this)"><div class="ex-num">F1</div><div class="ex-body"><div class="ex-name">Spanish Squat (Band-Assisted)</div><div class="ex-sub">Band around post · vertical shin · deep knee</div><div class="ex-sets">3 × 12</div><div class="tags"><span class="tag t-wb">Week B</span><span class="tag t-rehab">Quad Rehab progression</span></div></div></div>
+  <div class="ex rehab" onclick="toggleDone(this)"><div class="ex-num">F2</div><div class="ex-body"><div class="ex-name">Single Leg Balance (foam pad)</div><div class="ex-sub">On uneven surface · eyes open then closed</div><div class="ex-sets">3 × 30s/side</div><div class="tags"><span class="tag t-rehab">Ankle Rehab</span></div></div></div>
+
+  <div class="sec cardio">Cardio — Alactic Power — 10 min</div>
+  <div class="cardio-block">
+    <div class="cb-title">⚡ 10m Max-Effort Sprints</div>
+    <div class="cb-stats">
+      <div class="cb-stat">10 sec ON</div>
+      <div class="cb-stat">50 sec REST</div>
+      <div class="cb-stat">8–10 reps</div>
+    </div>
+    <div class="cb-body"><strong>How:</strong> Flat 10m absolute max-effort sprint, full stop, walk back slowly.<br><strong>Why:</strong> Pure alactic system — every GK dive and explosive jump lives here. 1:5 ratio ensures full ATP-CP recovery so you train true max speed.<br><strong>Rule:</strong> If rep 8 is slower than rep 1, stop. Always done after lifting.</div>
+  </div>
+
+  <div class="reset-row"><button class="reset-btn" onclick="resetPanel('p0')">Reset Day</button></div>
+</div>
+
+<!-- ═══════════════════════════ TUESDAY ═══════════════════════════ -->
+<div class="panel" id="p1">
+  <div class="day-hdr">
+    <div class="day-title">Upper Body + Core</div>
+    <div class="day-focus">Push/Pull · Left Arm Focus · Anti-Rotation · Aerobic Recovery</div>
+    <div class="day-dur"><strong>~75 min</strong> total</div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="prog1"></div></div>
+    <div class="progress-label" id="prog1lbl">0 of 0 done</div>
+  </div>
+
+  <div class="sec">Warm-Up — 8 min</div>
+  <div class="ex" onclick="toggleDone(this)"><div class="ex-num">W1</div><div class="ex-body"><div class="ex-name">Band Pull-Aparts + Y-T-W Raises</div><div class="ex-sub">Light band · scapular activation</div><div class="ex-sets">3 × 12</div></div></div>
+  <div class="ex rehab" onclick="toggleDone(this)"><div class="ex-num">W2</div><div class="ex-body"><div class="ex-name">Quadruped Reach-Through</div><div class="ex-sub">Thoracic rotation · rotate from mid-back</div><div class="ex-sets">2 × 8/side</div><div class="tags"><span class="tag t-core">Core</span></div></div></div>
+
+  <div class="sec">Main Block — 45 min</div>
+  <div class="ex compound wa" onclick="toggleDone(this)"><div class="ex-num">A1</div><div class="ex-body"><div class="ex-name">Weighted Pull-Up or Lat Pulldown</div><div class="ex-sub">Full hang to chin · control the descent</div><div class="ex-sets">4 × 6</div><div class="tags"><span class="tag t-compound">Compound</span></div></div></div>
+  <div class="ex compound wb" onclick="toggleDone(this)"><div class="ex-num">A1</div><div class="ex-body"><div class="ex-name">Chest-Supported Row</div><div class="ex-sub">Chest on incline bench · no hip drive</div><div class="ex-sets">4 × 8</div><div class="tags"><span class="tag t-wb">Week B</span><span class="tag t-compound">Compound</span></div></div></div>
+
+  <div class="ex compound wa" onclick="toggleDone(this)"><div class="ex-num">A2</div><div class="ex-body"><div class="ex-name">Incline Dumbbell Press</div><div class="ex-sub">Left arm leads · match reps to weaker side</div><div class="ex-sets">3 × 10</div><div class="tags"><span class="tag t-compound">Compound</span></div></div></div>
+  <div class="ex compound wb" onclick="toggleDone(this)"><div class="ex-num">A2</div><div class="ex-body"><div class="ex-name">Landmine Floor Press</div><div class="ex-sub">Half-kneeling · unilateral pressing angle</div><div class="ex-sets">3 × 10/side</div><div class="tags"><span class="tag t-wb">Week B</span><span class="tag t-compound">Compound</span></div></div></div>
+
+  <div class="ex compound" onclick="toggleDone(this)"><div class="ex-num">B1</div><div class="ex-body"><div class="ex-name">Single-Arm DB Row (Left emphasis)</div><div class="ex-sub">3-sec hold at top · full scapular retraction</div><div class="ex-sets">4 × 10/side</div><div class="tags"><span class="tag t-compound">Unilateral</span><span class="tag t-fixed">Always kept</span></div></div></div>
+  <div class="ex gk-ex" onclick="toggleDone(this)"><div class="ex-num">B2</div><div class="ex-body"><div class="ex-name">Landmine Press or Single-Arm Cable Press</div><div class="ex-sub">Rotational pressing pattern</div><div class="ex-sets">3 × 10/side</div><div class="tags"><span class="tag t-gk">GK Pattern</span></div></div></div>
+  <div class="ex" onclick="toggleDone(this)"><div class="ex-num">C1</div><div class="ex-body"><div class="ex-name">Pallof Press (Anti-Rotation Hold)</div><div class="ex-sub">Cable or band · stand tall · no trunk rotation</div><div class="ex-sets">3 × 12/side</div><div class="tags"><span class="tag t-core">Core</span></div></div></div>
+
+  <div class="ex wa" onclick="toggleDone(this)"><div class="ex-num">C2</div><div class="ex-body"><div class="ex-name">Dead Bug with Dumbbell</div><div class="ex-sub">Lower back pressed to floor throughout</div><div class="ex-sets">3 × 10/side</div><div class="tags"><span class="tag t-core">Core</span></div></div></div>
+  <div class="ex wb" onclick="toggleDone(this)"><div class="ex-num">C2</div><div class="ex-body"><div class="ex-name">Stir the Pot (Stability Ball)</div><div class="ex-sub">Forearms on ball · draw circles · stay rigid</div><div class="ex-sets">3 × 8 circles/side</div><div class="tags"><span class="tag t-wb">Week B</span><span class="tag t-core">Core — harder progression</span></div></div></div>
+
+  <div class="sec">Finisher — 10 min</div>
+  <div class="ex" onclick="toggleDone(this)"><div class="ex-num">F1</div><div class="ex-body"><div class="ex-name">Face Pulls + External Rotation</div><div class="ex-sub">Cable · elbow at 90° · lead elbows back</div><div class="ex-sets">3 × 15</div></div></div>
+  <div class="ex" onclick="toggleDone(this)"><div class="ex-num">F2</div><div class="ex-body"><div class="ex-name">Farmer's Carry — Left Hand Only</div><div class="ex-sub">Heavy · walk 20m · posture upright</div><div class="ex-sets">3 × 20m</div></div></div>
+
+  <div class="sec cardio">Cardio — Aerobic Recovery — 10 min</div>
+  <div class="cardio-block">
+    <div class="cb-title">○ Zone 2 Aerobic Flush</div>
+    <div class="cb-stats">
+      <div class="cb-stat">10 min steady</div>
+      <div class="cb-stat">Zone 2</div>
+      <div class="cb-stat">~60% max HR</div>
+    </div>
+    <div class="cb-body"><strong>How:</strong> Bike, row, or brisk walk. Conversational pace — you should hold a full sentence.<br><strong>Why:</strong> Between two heavy lower days. Flushes Monday's fatigue, keeps aerobic base ticking without stress.<br><strong>Bike preferred</strong> — zero ankle load. Avoid running today.</div>
+  </div>
+
+  <div class="reset-row"><button class="reset-btn" onclick="resetPanel('p1')">Reset Day</button></div>
+</div>
+
+<!-- ═══════════════════════════ WEDNESDAY GK ═══════════════════════════ -->
+<div class="panel gk-panel" id="p2">
+  <div class="day-hdr">
+    <div class="day-title">GK Solo Session</div>
+    <div class="day-focus">Footwork · Diving · Distribution · Reflexes</div>
+    <div class="day-dur"><strong>~70 min</strong> field / gym</div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="prog2"></div></div>
+    <div class="progress-label" id="prog2lbl">0 of 0 done</div>
+  </div>
+
+  <div class="sec">Activation — 10 min</div>
+  <div class="ex rehab" onclick="toggleDone(this)"><div class="ex-num">W1</div><div class="ex-body"><div class="ex-name">Dynamic Ankle Circles + Heel-Toe Walk</div><div class="ex-sub">20m each · controlled on grass</div><div class="ex-sets">2 × 20m</div><div class="tags"><span class="tag t-rehab">Ankle Prep</span></div></div></div>
+  <div class="ex gk-ex" onclick="toggleDone(this)"><div class="ex-num">W2</div><div class="ex-body"><div class="ex-name">GK Ready Position + Weight Shifts</div><div class="ex-sub">Low stance · soft knees · hands ready</div><div class="ex-sets">3 × 20s</div><div class="tags"><span class="tag t-gk">GK Pattern</span></div></div></div>
+
+  <div class="sec">Block 1 — Footwork — 20 min</div>
+  <div class="ex gk-ex" onclick="toggleDone(this)"><div class="ex-num">1A</div><div class="ex-body"><div class="ex-name">Ladder Drills: T-Step, Crossover, In-Out</div><div class="ex-sub">3 patterns × 3 runs each</div><div class="ex-sets">9 runs</div><div class="tags"><span class="tag t-gk">Footwork</span></div></div></div>
+  <div class="ex gk-ex" onclick="toggleDone(this)"><div class="ex-num">1B</div><div class="ex-body"><div class="ex-name">Lateral Power Step + Reset (Cone Drill)</div><div class="ex-sub">5 cones × 1m · shuffle, plant, reset</div><div class="ex-sets">4 × 6/side</div><div class="tags"><span class="tag t-gk">Lateral</span></div></div></div>
+
+  <div class="ex gk-ex wa" onclick="toggleDone(this)"><div class="ex-num">1C</div><div class="ex-body"><div class="ex-name">Crossover Run + Controlled Dive</div><div class="ex-sub">Sprint 3 steps · dive to knees · both sides</div><div class="ex-sets">3 × 4/side</div><div class="tags"><span class="tag t-gk">Dive Prep</span></div></div></div>
+  <div class="ex gk-ex wb" onclick="toggleDone(this)"><div class="ex-num">1C</div><div class="ex-body"><div class="ex-name">Band-Resisted Lateral Shuffle Sprint</div><div class="ex-sub">Anchored band · 5m explosive shuffles</div><div class="ex-sets">4 × 5/side</div><div class="tags"><span class="tag t-wb">Week B</span><span class="tag t-gk">Lateral Power</span></div></div></div>
+
+  <div class="sec">Block 2 — Diving &amp; Shot Stopping — 25 min</div>
+  <div class="ex gk-ex" onclick="toggleDone(this)"><div class="ex-num">2A</div><div class="ex-body"><div class="ex-name">Self-Toss Dive — Low Balls</div><div class="ex-sub">Toss to side · dive low · secure with two hands</div><div class="ex-sets">4 × 5/side</div><div class="tags"><span class="tag t-gk">Diving</span></div></div></div>
+
+  <div class="ex gk-ex wa" onclick="toggleDone(this)"><div class="ex-num">2B</div><div class="ex-body"><div class="ex-name">Wall Toss — Mid-Height Reaction Save</div><div class="ex-sub">Toss against wall · catch at mid-height on bounce</div><div class="ex-sets">3 × 10</div><div class="tags"><span class="tag t-gk">Reflex</span></div></div></div>
+  <div class="ex gk-ex wb" onclick="toggleDone(this)"><div class="ex-num">2B</div><div class="ex-body"><div class="ex-name">Tennis Ball Drop Catches</div><div class="ex-sub">Hold 2 balls at shoulder height · drop one · catch before 2nd bounce</div><div class="ex-sets">3 × 12</div><div class="tags"><span class="tag t-wb">Week B</span><span class="tag t-gk">Reflex</span></div></div></div>
+
+  <div class="ex gk-ex" onclick="toggleDone(this)"><div class="ex-num">2C</div><div class="ex-body"><div class="ex-name">Wall Volleys — Both Hands (Left emphasis)</div><div class="ex-sub">Rebound board or wall · control and redirect</div><div class="ex-sets">3 × 30s</div><div class="tags"><span class="tag t-gk">Distribution</span></div></div></div>
+  <div class="ex gk-ex" onclick="toggleDone(this)"><div class="ex-num">2D</div><div class="ex-body"><div class="ex-name">Full Extension Dive (foam pad)</div><div class="ex-sub">Launch from post · extend fully · both sides · pain-free only</div><div class="ex-sets">3 × 3/side</div><div class="tags"><span class="tag t-gk">Diving</span></div></div></div>
+
+  <div class="sec">Block 3 — Distribution — 10 min</div>
+  <div class="ex gk-ex wa" onclick="toggleDone(this)"><div class="ex-num">3A</div><div class="ex-body"><div class="ex-name">Goal Kicks — Short + Long</div><div class="ex-sub">Driven, lofted, and driven low · monitor ankle</div><div class="ex-sets">20 kicks</div><div class="tags"><span class="tag t-gk">Kicking</span></div></div></div>
+  <div class="ex gk-ex wb" onclick="toggleDone(this)"><div class="ex-num">3A</div><div class="ex-body"><div class="ex-name">Crossbar Challenge Kicks</div><div class="ex-sub">Aim for crossbar from 18-yard box · weeks 4+ only</div><div class="ex-sets">15 kicks</div><div class="tags"><span class="tag t-wb">Week B</span><span class="tag t-gk">Precision</span></div></div></div>
+  <div class="ex gk-ex" onclick="toggleDone(this)"><div class="ex-num">3B</div><div class="ex-body"><div class="ex-name">Overarm Throw (Javelin) + Roll-Out</div><div class="ex-sub">Hip rotation drives the throw</div><div class="ex-sets">15 throws</div><div class="tags"><span class="tag t-gk">Distribution</span></div></div></div>
+  <div class="ex gk-ex wb" onclick="toggleDone(this)"><div class="ex-num">3C</div><div class="ex-body"><div class="ex-name">Rolling Save → Immediate Outlet Throw</div><div class="ex-sub">Dive to ground · recover · throw to target immediately</div><div class="ex-sets">3 × 5/side</div><div class="tags"><span class="tag t-wb">Week B</span><span class="tag t-gk">Match Realism</span></div></div></div>
+
+  <div class="tip"><strong>Cardio note:</strong> This session IS your cardio today. Keep rest periods honest — 60–90 sec between diving sets max. The footwork and diving sequences naturally hit alactic and lactic systems. No additional cardio needed.</div>
+
+  <div class="reset-row"><button class="reset-btn" onclick="resetPanel('p2')">Reset Day</button></div>
+</div>
+
+<!-- ═══════════════════════════ THURSDAY ═══════════════════════════ -->
+<div class="panel" id="p3">
+  <div class="day-hdr">
+    <div class="day-title">Posterior Chain</div>
+    <div class="day-focus">Hip Hinge · Hamstring · Glute Power · Lactic Cardio</div>
+    <div class="day-dur"><strong>~80 min</strong> total</div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="prog3"></div></div>
+    <div class="progress-label" id="prog3lbl">0 of 0 done</div>
+  </div>
+
+  <div class="sec">Warm-Up — 10 min</div>
+  <div class="ex rehab" onclick="toggleDone(this)"><div class="ex-num">W1</div><div class="ex-body"><div class="ex-name">Banded Clamshells + Hip Abduction</div><div class="ex-sub">Light band · glute med activation · no ankle load</div><div class="ex-sets">2 × 15/side</div><div class="tags"><span class="tag t-rehab">Ankle-safe</span></div></div></div>
+  <div class="ex" onclick="toggleDone(this)"><div class="ex-num">W2</div><div class="ex-body"><div class="ex-name">Good Morning (BW) + Hip Flexor Stretch</div><div class="ex-sub">Hinge from hips not waist</div><div class="ex-sets">2 × 10</div></div></div>
+
+  <div class="sec">Main Block — 45 min</div>
+  <div class="ex compound" onclick="toggleDone(this)"><div class="ex-num">A1</div><div class="ex-body"><div class="ex-name">Conventional Deadlift</div><div class="ex-sub">Brace hard · push floor away · no rounding</div><div class="ex-sets">4 × 4 @ RPE8</div><div class="tags"><span class="tag t-compound">Compound</span><span class="tag t-fixed">Fixed — don't swap</span></div></div></div>
+  <div class="ex compound gk-ex" onclick="toggleDone(this)"><div class="ex-num">A2</div><div class="ex-body"><div class="ex-name">Hip Thrust (Barbell)</div><div class="ex-sub">Drive through heels · squeeze glutes at top</div><div class="ex-sets">4 × 10</div><div class="tags"><span class="tag t-compound">Compound</span><span class="tag t-gk">GK Jump Power</span><span class="tag t-fixed">Fixed</span></div></div></div>
+  <div class="ex compound" onclick="toggleDone(this)"><div class="ex-num">B1</div><div class="ex-body"><div class="ex-name">Single-Leg RDL (Left stance focus)</div><div class="ex-sub">DB in opposite hand · hinge to floor</div><div class="ex-sets">3 × 8/side</div><div class="tags"><span class="tag t-compound">Unilateral</span></div></div></div>
+  <div class="ex rehab" onclick="toggleDone(this)"><div class="ex-num">B2</div><div class="ex-body"><div class="ex-name">Nordic Hamstring Curl</div><div class="ex-sub">Assisted or full · slow eccentric only if quad tender</div><div class="ex-sets">3 × 5</div><div class="tags"><span class="tag t-rehab">Quad/Hamstring</span><span class="tag t-fixed">Always kept</span></div></div></div>
+
+  <div class="ex compound wa" onclick="toggleDone(this)"><div class="ex-num">C1</div><div class="ex-body"><div class="ex-name">Sumo Deadlift or Wide-Stance Good Morning</div><div class="ex-sub">Wide base · more hip abductor involvement</div><div class="ex-sets">3 × 8</div><div class="tags"><span class="tag t-gk">GK Pattern</span></div></div></div>
+  <div class="ex compound wb" onclick="toggleDone(this)"><div class="ex-num">C1</div><div class="ex-body"><div class="ex-name">Kettlebell Swing</div><div class="ex-sub">Hip hinge power · explosive glute drive</div><div class="ex-sets">4 × 12</div><div class="tags"><span class="tag t-wb">Week B</span><span class="tag t-compound">Hip Power</span></div></div></div>
+
+  <div class="ex rehab" onclick="toggleDone(this)"><div class="ex-num">C2</div><div class="ex-body"><div class="ex-name">Seated Ankle Inversion/Eversion</div><div class="ex-sub">Resistance band around forefoot</div><div class="ex-sets">3 × 15/side</div><div class="tags"><span class="tag t-rehab">Ankle Rehab</span></div></div></div>
+
+  <div class="sec">Finisher — 10 min</div>
+  <div class="ex" onclick="toggleDone(this)"><div class="ex-num">F1</div><div class="ex-body"><div class="ex-name">Glute Bridge March</div><div class="ex-sub">Hold bridge · alternate marching knees to chest</div><div class="ex-sets">3 × 20 steps</div></div></div>
+  <div class="ex" onclick="toggleDone(this)"><div class="ex-num">F2</div><div class="ex-body"><div class="ex-name">90/90 Hip Stretch + Pigeon Pose</div><div class="ex-sub">Hold · breathe · sink deeper</div><div class="ex-sets">2 min/side</div></div></div>
+
+  <div class="sec cardio">Cardio — Lactic Capacity — 10 min</div>
+  <div class="cardio-block">
+    <div class="cb-title">🔥 Multi-Directional Shuttle Runs</div>
+    <div class="cb-stats">
+      <div class="cb-stat">~30 sec work</div>
+      <div class="cb-stat">90 sec rest</div>
+      <div class="cb-stat">5–6 reps</div>
+    </div>
+    <div class="cb-body"><strong>One rep:</strong> Sprint 5m → touch → back → sprint 10m → touch → back → sprint 15m → touch → back. Rest 90 sec. Repeat.<br><strong>Why:</strong> Lactic system — the 10–45 sec bursts of repositioning, saving, crossing. Multi-directional mirrors match demands.<br><strong>Ankle note:</strong> Even surfaces. Early weeks use 4m / 8m / 12m distances.</div>
+  </div>
+
+  <div class="reset-row"><button class="reset-btn" onclick="resetPanel('p3')">Reset Day</button></div>
+</div>
+
+<!-- ═══════════════════════════ FRIDAY ═══════════════════════════ -->
+<div class="panel" id="p4">
+  <div class="day-hdr">
+    <div class="day-title">Athletic Power Complex</div>
+    <div class="day-focus">Explosive Output · Lateral Plyos · GK Reactions · Cardio Built In</div>
+    <div class="day-dur"><strong>~65 min</strong> total</div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="prog4"></div></div>
+    <div class="progress-label" id="prog4lbl">0 of 0 done</div>
+  </div>
+
+  <div class="sec">Warm-Up — 10 min</div>
+  <div class="ex rehab" onclick="toggleDone(this)"><div class="ex-num">W1</div><div class="ex-body"><div class="ex-name">Ankle Band Walk + Single-Leg Hop (low)</div><div class="ex-sub">Soft surface · 3-inch hops only to start</div><div class="ex-sets">2 × 10/side</div><div class="tags"><span class="tag t-rehab">Ankle Prep</span></div></div></div>
+  <div class="ex" onclick="toggleDone(this)"><div class="ex-num">W2</div><div class="ex-body"><div class="ex-name">Jump Rope or High Knees</div><div class="ex-sub">Easy pace · CNS activation</div><div class="ex-sets">3 × 60s</div></div></div>
+
+  <div class="sec">Power Block — 35 min (cardio integrated)</div>
+  <div class="ex compound wa" onclick="toggleDone(this)"><div class="ex-num">A1</div><div class="ex-body"><div class="ex-name">Box Jump (24" box)</div><div class="ex-sub">Land soft · absorb hips/knees not ankles · step down</div><div class="ex-sets">4 × 4</div><div class="tags"><span class="tag t-compound">Power</span><span class="tag t-gk">GK Jump</span></div></div></div>
+  <div class="ex compound wb" onclick="toggleDone(this)"><div class="ex-num">A1</div><div class="ex-body"><div class="ex-name">Depth Drop to Broad Jump</div><div class="ex-sub">Step off 12" box · absorb · immediately broad jump</div><div class="ex-sets">4 × 4</div><div class="tags"><span class="tag t-wb">Week B</span><span class="tag t-gk">GK Pattern</span></div></div></div>
+
+  <div class="ex compound" onclick="toggleDone(this)"><div class="ex-num">A2</div><div class="ex-body"><div class="ex-name">Broad Jump + Stick Landing</div><div class="ex-sub">Two-footed · absorb for 2 sec</div><div class="ex-sets">4 × 4</div><div class="tags"><span class="tag t-compound">Power</span></div></div></div>
+
+  <div class="ex gk-ex wa" onclick="toggleDone(this)"><div class="ex-num">B1</div><div class="ex-body"><div class="ex-name">Lateral Bound — Skater Jump (Left-biased)</div><div class="ex-sub">Single leg land · left leg extra sets</div><div class="ex-sets">4 × 6/side</div><div class="tags"><span class="tag t-gk">Lateral Power</span></div></div></div>
+  <div class="ex gk-ex wb" onclick="toggleDone(this)"><div class="ex-num">B1</div><div class="ex-body"><div class="ex-name">Lateral Hurdle Hops</div><div class="ex-sub">Low hurdles 6–8" · continuous · land and go</div><div class="ex-sets">4 × 6/side</div><div class="tags"><span class="tag t-wb">Week B</span><span class="tag t-gk">Lateral Power</span></div></div></div>
+
+  <div class="ex gk-ex" onclick="toggleDone(this)"><div class="ex-num">B2</div><div class="ex-body"><div class="ex-name">Reactive Med Ball Slam + Side Toss</div><div class="ex-sub">10lb ball · explosive hip extension</div><div class="ex-sets">3 × 8/side</div><div class="tags"><span class="tag t-gk">Distribution</span></div></div></div>
+
+  <div class="ex compound wa" onclick="toggleDone(this)"><div class="ex-num">C1</div><div class="ex-body"><div class="ex-name">Trap Bar Jump Squat (40% 1RM)</div><div class="ex-sub">Explosive · full triple extension</div><div class="ex-sets">4 × 4</div><div class="tags"><span class="tag t-compound">Power</span></div></div></div>
+  <div class="ex compound wb" onclick="toggleDone(this)"><div class="ex-num">C1</div><div class="ex-body"><div class="ex-name">Kettlebell Swing to Jump</div><div class="ex-sub">Swing to hip height · jump at top of swing</div><div class="ex-sets">4 × 5</div><div class="tags"><span class="tag t-wb">Week B</span><span class="tag t-compound">Power</span></div></div></div>
+
+  <div class="ex cardio-ex gk-ex" onclick="toggleDone(this)"><div class="ex-num">C2</div><div class="ex-body"><div class="ex-name">Sprint + Backpedal Intervals (20m)</div><div class="ex-sub">Sprint forward · backpedal to start · GK movement</div><div class="ex-sets">6 × 20m</div><div class="tags"><span class="tag t-cardio">Cardio for today</span><span class="tag t-gk">GK Conditioning</span></div></div></div>
+
+  <div class="sec">Rehab + Cool Down — 15 min</div>
+  <div class="ex rehab" onclick="toggleDone(this)"><div class="ex-num">R1</div><div class="ex-body"><div class="ex-name">Step-Down Eccentric (Quad Focus)</div><div class="ex-sub">Stand on step · lower slowly on affected leg</div><div class="ex-sets">3 × 8/side</div><div class="tags"><span class="tag t-rehab">Quad Rehab</span></div></div></div>
+  <div class="ex rehab" onclick="toggleDone(this)"><div class="ex-num">R2</div><div class="ex-body"><div class="ex-name">STAR Excursion Balance Test</div><div class="ex-sub">Balance on one leg · reach in 8 directions</div><div class="ex-sets">2 × 8 dir/side</div><div class="tags"><span class="tag t-rehab">Ankle Rehab</span></div></div></div>
+  <div class="ex" onclick="toggleDone(this)"><div class="ex-num">R3</div><div class="ex-body"><div class="ex-name">Full Body Stretch Sequence</div><div class="ex-sub">Hamstring · hip flexor · quad · calf · shoulder · 30s each</div><div class="ex-sets">30s each</div></div></div>
+
+  <div class="tip"><strong>Progression:</strong> Add 2.5–5 lbs to compounds every 1–2 weeks. Cardio: add 1–2 sprint reps/week on Mon up to 12 total. Reduce Thu shuttle rest from 90s → 75s after week 4. Retest InBody at 8–12 weeks.<br><br><strong>Week A/B:</strong> Run each for 3–4 weeks. Compounds and rehab never change.</div>
+
+  <div class="reset-row"><button class="reset-btn" onclick="resetPanel('p4')">Reset Day</button></div>
+</div>
+
+<script>
+  // ── Tab switching ──
+  function switchTab(idx) {
+    var tabs = document.querySelectorAll('.tab');
+    var panels = document.querySelectorAll('.panel');
+    for (var i = 0; i < tabs.length; i++) {
+      tabs[i].classList.toggle('active', i === idx);
+      panels[i].classList.toggle('active', i === idx);
+    }
+    updateProgress('p' + idx);
+  }
+
+  // ── Week toggle ──
+  function setWeek(w) {
+    var btnA = document.getElementById('btnA');
+    var btnB = document.getElementById('btnB');
+    var note = document.getElementById('weekNote');
+    if (w === 'a') {
+      document.body.classList.remove('weekb');
+      btnA.className = 'week-btn on-a';
+      btnB.className = 'week-btn';
+      note.textContent = 'Standard accessories';
+    } else {
+      document.body.classList.add('weekb');
+      btnA.className = 'week-btn';
+      btnB.className = 'week-btn on-b';
+      note.textContent = 'Rotated accessories + GK variations';
+    }
+    updateProgress('p0');
+    updateProgress('p1');
+    updateProgress('p2');
+    updateProgress('p3');
+    updateProgress('p4');
+  }
+
+  // ── Check off exercises ──
+  function toggleDone(el) {
+    el.classList.toggle('done');
+    var panel = el.closest('.panel');
+    if (panel) updateProgress(panel.id);
+  }
+
+  function updateProgress(panelId) {
+    var panel = document.getElementById(panelId);
+    if (!panel) return;
+    var isWeekB = document.body.classList.contains('weekb');
+    var allEx = panel.querySelectorAll('.ex');
+    var visible = [];
+    for (var i = 0; i < allEx.length; i++) {
+      var el = allEx[i];
+      if (isWeekB) {
+        if (el.classList.contains('wa')) continue;
+      } else {
+        if (el.classList.contains('wb')) continue;
+      }
+      visible.push(el);
+    }
+    var done = visible.filter(function(e){ return e.classList.contains('done'); }).length;
+    var total = visible.length;
+    var pct = total > 0 ? Math.round((done / total) * 100) : 0;
+    var fill = document.getElementById('prog' + panelId.replace('p',''));
+    var lbl  = document.getElementById('prog' + panelId.replace('p','') + 'lbl');
+    if (fill) fill.style.width = pct + '%';
+    if (lbl)  lbl.textContent = done + ' of ' + total + ' done';
+    if (pct === 100 && total > 0) {
+      if (fill) fill.style.background = 'var(--gold)';
+    } else {
+      if (fill) fill.style.background = 'var(--lime)';
+    }
+  }
+
+  function resetPanel(panelId) {
+    var panel = document.getElementById(panelId);
+    if (!panel) return;
+    var exs = panel.querySelectorAll('.ex.done');
+    for (var i = 0; i < exs.length; i++) exs[i].classList.remove('done');
+    updateProgress(panelId);
+  }
+
+  // init all progress bars
+  updateProgress('p0');
+  updateProgress('p1');
+  updateProgress('p2');
+  updateProgress('p3');
+  updateProgress('p4');
+</script>
+</body>
+</html>
