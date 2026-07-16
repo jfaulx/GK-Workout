@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>The Keeper's Block v2</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600&display=swap');
+
+  :root {
+    --pitch: #162820;
+    --card: #1c3028;
+    --card2: #223a30;
+    --border: #2d4a3a;
+    --lime: #b7e34d;
+    --gold: #f0c040;
+    --orange: #e8651a;
+    --blue: #4db8e8;
+    --purple: #b07ef5;
+    --white: #f0ede6;
+    --muted: #7a8f7e;
+    --dark: #0f1f18;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background: var(--pitch);
+    color: var(--white);
+    font-family: 'Inter', -apple-system, sans-serif;
+    font-size: 15px;
+    min-height: 100vh;
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: var(--dark);
+    padding: 52px 20px 20px;
+    border-bottom: 2px solid var(--lime);
+  }
+  .eyebrow {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--lime);
+    margin-bottom: 4px;
+  }
+  .title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 36px;
+    font-weight: 800;
+    text-transform: uppercase;
+    line-height: 1;
+    color: var(--white);
+  }
+  .title span { color: var(--lime); }
+  .subtitle { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+
+  /* ── STAT BAR ── */
+  .stats-bar {
+    background: var(--dark);
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--border);
+    scrollbar-width: none;
+  }
+  .stats-bar::-webkit-scrollbar { display: none; }
+  .stat {
+    flex: 0 0 auto;
+    padding: 12px 16px 12px 0;
+    margin-right: 16px;
+    border-right: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .stat:last-child { border-right: none; }
+  .stat-l { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+  .stat-v { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; color: var(--gold); }
+  .stat-u { font-size: 10px; color: var(--muted); }
+
+  /* ── WEEK MAP STRIP ── */
+  .weekmap {
+    display: flex;
+    overflow-x: auto;
+    gap: 6px;
+    padding: 12px 16px 0;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .weekmap::-webkit-scrollbar { display: none; }
+  .wm-day {
+    flex: 0 0 auto;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 8px 10px;
+    min-width: 86px;
+  }
+  .wm-day.today-gym { border-color: rgba(183,227,77,0.5); }
+  .wm-d { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 1px; color: var(--white); text-transform: uppercase; }
+  .wm-line { font-size: 9px; margin-top: 3px; line-height: 1.5; }
+  .wm-gym { color: var(--lime); }
+  .wm-field { color: var(--gold); }
+  .wm-rest { color: var(--muted); }
+  .wm-cardio { color: var(--blue); }
+
+  /* ── BANNERS ── */
+  .banner {
+    margin: 14px 16px 0;
+    padding: 11px 14px;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 1.6;
+    border-left: 3px solid;
+  }
+  .banner.injury { background: rgba(232,101,26,0.12); border-color: var(--orange); color: #f5c9a0; }
+  .banner.asym   { background: rgba(240,192,64,0.08);  border-color: var(--gold);   color: #f5e0a0; }
+  .banner.load   { background: rgba(77,184,232,0.08);  border-color: var(--blue);   color: #a8d8ee; }
+  .banner strong { font-weight: 600; }
+  .banner.injury strong { color: var(--orange); }
+  .banner.asym strong   { color: var(--gold); }
+  .banner.load strong   { color: var(--blue); }
+
+  /* ── WEEK TOGGLE ── */
+  .week-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 16px 0;
+  }
+  .week-lbl { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; }
+  .week-btn {
+    padding: 8px 20px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    min-height: 40px;
+  }
+  .week-btn.on-a { background: var(--lime); color: var(--dark); border-color: var(--lime); }
+  .week-btn.on-b { background: var(--purple); color: var(--dark); border-color: var(--purple); }
+  .week-note { font-size: 11px; color: var(--muted); }
+
+  /* ── DAY TABS ── */
+  .tabs {
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    gap: 8px;
+    padding: 14px 16px 0;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    flex: 0 0 auto;
+    padding: 10px 16px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    white-space: nowrap;
+    -webkit-appearance: none;
+    appearance: none;
+    min-height: 44px;
+  }
+  .tab.active { background: var(--lime); color: var(--dark); border-color: var(--lime); }
+  .tab.gk-tab { border-color: rgba(240,192,64,0.4); color: var(--gold); }
+  .tab.gk-tab.active { background: var(--gold); color: var(--dark); border-color: var(--gold); }
+  .gk-panel .day-title { color: var(--gold); }
+  .gk-panel .day-focus { color: var(--gold); }
+  .tab.plan-tab { border-color: rgba(77,184,232,0.4); color: var(--blue); }
+  .tab.plan-tab.active { background: var(--blue); color: var(--dark); border-color: var(--blue); }
+
+  /* ── PANELS ── */
+  .panel { display: none; padding: 16px 16px 40px; }
+  .panel.active { display: block; }
+
+  .day-hdr { margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+  .day-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--white);
+    line-height: 1;
+  }
+  .day-focus { font-size: 11px; color: var(--lime); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 4px; }
+  .day-dur { font-size: 12px; color: var(--muted); margin-top: 6px; }
+  .day-dur strong { color: var(--gold); font-family: 'Barlow Condensed', sans-serif; font-size: 18px; }
+  .day-warning { font-size: 11px; color: var(--orange); margin-top: 6px; line-height: 1.5; }
+
+  /* ── SECTION LABELS ── */
+  .sec {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 18px 0 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sec::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .sec.cardio { color: var(--blue); }
+  .sec.cardio::after { background: rgba(77,184,232,0.25); }
+
+  /* ── EXERCISE ROWS ── */
+  .ex {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 13px 14px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+    position: relative;
+    transition: opacity 0.2s;
+  }
+  .ex.done { opacity: 0.45; }
+  .ex.done .ex-num { color: var(--lime); }
+  .ex.done::after {
+    content: '✓';
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--lime);
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .ex.compound { border-left: 3px solid var(--lime); }
+  .ex.rehab    { border-left: 3px solid var(--orange); }
+  .ex.gk-ex    { border-left: 3px solid var(--gold); }
+  .ex.cardio-ex{ border-left: 3px solid var(--blue); background: rgba(77,184,232,0.04); }
+  .ex.weak-ex  { border-left: 3px solid var(--purple); }
+
+  .ex-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--muted);
+    min-width: 24px;
+    padding-top: 1px;
+  }
+  .ex-body { flex: 1; min-width: 0; }
+  .ex-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--white);
+    line-height: 1.3;
+    padding-right: 24px;
+  }
+  .ex-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 3px;
+    line-height: 1.4;
+  }
+  .ex-sets {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gold);
+    margin-top: 5px;
+  }
+  .cardio-ex .ex-sets { color: var(--blue); }
+
+  /* weight chip — tap to edit */
+  .wt {
+    display: inline-block;
+    background: rgba(240,192,64,0.15);
+    border: 1px dashed rgba(240,192,64,0.5);
+    color: var(--gold);
+    padding: 1px 8px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+  }
+  .wt::after { content: ' ✎'; font-size: 10px; opacity: 0.7; }
+
+  /* tags */
+  .tags { margin-top: 5px; display: flex; flex-wrap: wrap; gap: 4px; }
+  .tag {
+    font-size: 9px;
+    font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 2px;
+  }
+  .tag.t-compound { background: rgba(183,227,77,0.15); color: var(--lime); }
+  .tag.t-rehab    { background: rgba(232,101,26,0.2);  color: var(--orange); }
+  .tag.t-gk       { background: rgba(240,192,64,0.15); color: var(--gold); }
+  .tag.t-core     { background: rgba(100,160,255,0.15);color: #8cb8ff; }
+  .tag.t-cardio   { background: rgba(77,184,232,0.15); color: var(--blue); }
+  .tag.t-fixed    { background: rgba(77,184,232,0.1);  color: var(--blue); }
+  .tag.t-wb       { background: rgba(176,126,245,0.15);color: var(--purple); }
+  .tag.t-weak     { background: rgba(176,126,245,0.2); color: var(--purple); }
+  .tag.t-opt      { background: rgba(122,143,126,0.2); color: var(--muted); }
+
+  /* Block 2 rows */
+  .wb { display: none; }
+  body.weekb .wa { display: none; }
+  body.weekb .wb { display: flex; }
+  .wb .ex-name::after {
+    content: 'BLOCK 2';
+    font-size: 8px;
+    font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: 1px;
+    background: rgba(176,126,245,0.2);
+    color: var(--purple);
+    padding: 1px 6px;
+    border-radius: 2px;
+    margin-left: 8px;
+    vertical-align: middle;
+    font-weight: 700;
+  }
+
+  /* ── CARDIO BLOCK ── */
+  .cardio-block {
+    background: rgba(77,184,232,0.06);
+    border: 1px solid rgba(77,184,232,0.2);
+    border-radius: 6px;
+    padding: 14px;
+    margin-top: 6px;
+  }
+  .cb-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--blue);
+    margin-bottom: 10px;
+  }
+  .cb-stats { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .cb-stat {
+    background: rgba(77,184,232,0.12);
+    color: var(--blue);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 3px;
+  }
+  .cb-body { font-size: 12px; color: #a8d8ee; line-height: 1.7; }
+  .cb-body strong { color: var(--white); }
+
+  /* ── TIP CARD ── */
+  .tip {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px;
+    margin-top: 14px;
+    font-size: 12px;
+    color: #a8b8a8;
+    line-height: 1.7;
+  }
+  .tip strong { color: var(--white); }
+
+  /* ── LEGEND ── */
+  .legend { display: flex; flex-wrap: wrap; gap: 10px; padding: 10px 0 4px; }
+  .leg-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); }
+  .leg-dot { width: 8px; height: 8px; border-radius: 1px; }
+
+  /* ── RESET ── */
+  .reset-row { display: flex; justify-content: flex-end; gap: 8px; padding: 14px 0 0; }
+  .reset-btn {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 8px 14px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 4px;
+    cursor: pointer;
+    -webkit-appearance: none;
+    min-height: 36px;
+  }
+
+  /* progress bar */
+  .progress-bar-wrap { background: var(--border); border-radius: 99px; height: 4px; margin: 10px 0 0; overflow: hidden; }
+  .progress-bar-fill { height: 100%; background: var(--lime); border-radius: 99px; transition: width 0.3s; width: 0%; }
+  .progress-label { font-size: 10px; color: var(--muted); margin-top: 4px; }
+
+  /* ── PLAN TAB ── */
+  .plan-sec-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--blue);
+    margin: 20px 0 10px;
+  }
+  .plan-sec-title:first-child { margin-top: 0; }
+  .weak-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--purple);
+    border-radius: 6px;
+    padding: 12px 14px;
+    margin-bottom: 6px;
+  }
+  .weak-rank {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--purple);
+    margin-bottom: 3px;
+  }
+  .weak-name { font-size: 14px; font-weight: 600; color: var(--white); }
+  .weak-evidence { font-size: 11px; color: var(--muted); margin-top: 4px; line-height: 1.55; }
+  .weak-fix { font-size: 11px; color: #c9b8ee; margin-top: 4px; line-height: 1.5; }
+  .weak-fix strong { color: var(--purple); }
+  .strength-card { border-left-color: var(--lime); }
+  .strength-card .weak-rank { color: var(--lime); }
+
+  .rule-list { list-style: none; }
+  .rule-list li {
+    font-size: 12px;
+    color: #a8b8a8;
+    line-height: 1.7;
+    padding: 8px 0 8px 24px;
+    position: relative;
+    border-bottom: 1px solid rgba(45,74,58,0.5);
+  }
+  .rule-list li::before {
+    content: '▸';
+    position: absolute;
+    left: 6px;
+    color: var(--lime);
+  }
+  .rule-list li strong { color: var(--white); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="eyebrow">InBody + Fitbod-Informed · In-Season Program</div>
+  <div class="title">The <span>Keeper's</span> Block <span style="color:var(--gold)">v2</span></div>
+  <div class="subtitle">4 Gym Days Around 5–6 Field Sessions · 27yo · 175.4 lbs · 11.4% BF · Starting weights from your last 582 logged workouts</div>
+</div>
+
+<div class="stats-bar">
+  <div class="stat"><div class="stat-l">Weight</div><div class="stat-v">175.4<span class="stat-u"> lbs</span></div></div>
+  <div class="stat"><div class="stat-l">Muscle</div><div class="stat-v">89.7<span class="stat-u"> lbs</span></div></div>
+  <div class="stat"><div class="stat-l">Body Fat</div><div class="stat-v">11.4<span class="stat-u">%</span></div></div>
+  <div class="stat"><div class="stat-l">Field Load</div><div class="stat-v">5–6<span class="stat-u"> /wk</span></div></div>
+  <div class="stat"><div class="stat-l">Gym Days</div><div class="stat-v">4<span class="stat-u"> /wk</span></div></div>
+  <div class="stat"><div class="stat-l">BMR</div><div class="stat-v">1892<span class="stat-u"> kcal</span></div></div>
+</div>
+
+<div class="weekmap">
+  <div class="wm-day today-gym"><div class="wm-d">Mon</div><div class="wm-line wm-gym">GYM · Lower A</div><div class="wm-line wm-rest">No soccer</div></div>
+  <div class="wm-day"><div class="wm-d">Tue</div><div class="wm-line wm-cardio">Zone 2 · 30 min</div><div class="wm-line wm-field">7v7 game PM</div></div>
+  <div class="wm-day today-gym"><div class="wm-d">Wed</div><div class="wm-line wm-gym">GYM AM · Upper A</div><div class="wm-line wm-field">GK Primer + Train PM</div></div>
+  <div class="wm-day today-gym"><div class="wm-d">Thu</div><div class="wm-line wm-gym">GYM · Lower B</div><div class="wm-line wm-cardio">Optional easy spin</div></div>
+  <div class="wm-day today-gym"><div class="wm-d">Fri</div><div class="wm-line wm-gym">GYM AM · Upper B</div><div class="wm-line wm-field">GK Primer + Train PM</div></div>
+  <div class="wm-day"><div class="wm-d">Sat</div><div class="wm-line wm-field">MATCH</div></div>
+  <div class="wm-day"><div class="wm-d">Sun</div><div class="wm-line wm-field">MATCH</div></div>
+</div>
+
+<div class="banner injury"><strong>⚠ Injury:</strong> Ankle sprain + quad tear history. Squat is rebuilding from the bar (your 6/22 log) — targets start light on purpose. Rehab-tagged items are never skipped.</div>
+<div class="banner asym"><strong>📊 Priority:</strong> Legs at 108–110% of ideal vs arms at 123–127%. Fitbod history confirms: lower body appears in a small fraction of your 582 sessions. Both lower days are non-negotiable.</div>
+<div class="banner load"><strong>💡 Tip:</strong> Tap any gold weight chip to set your own target — it saves on this device. Check-offs save too (Reset Day clears them).</div>
+
+<div class="week-bar">
+  <span class="week-lbl">Block:</span>
+  <button class="week-btn on-a" id="btnA" onclick="setWeek('a')">Block 1</button>
+  <button class="week-btn" id="btnB" onclick="setWeek('b')">Block 2</button>
+  <span class="week-note" id="weekNote">Weeks 1–4 · deload wk 5 · then switch</span>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab(0)">Mon</button>
+  <button class="tab" onclick="switchTab(1)">Wed AM</button>
+  <button class="tab" onclick="switchTab(2)">Thu</button>
+  <button class="tab" onclick="switchTab(3)">Fri AM</button>
+  <button class="tab gk-tab" onclick="switchTab(4)">GK Primer</button>
+  <button class="tab plan-tab" onclick="switchTab(5)">Plan</button>
+</div>
+
+<!-- ═══════════════ MONDAY — LOWER A ═══════════════ -->
+<div class="panel active" id="p0">
+  <div class="day-hdr">
+    <div class="day-title">Lower A — Squat + Power</div>
+    <div class="day-focus">Heaviest Leg Day · Only Casual 7v7 Follows</div>
+    <div class="day-dur"><strong>~75 min</strong> · warm-up 8 · power/plyo 14 · main 38 · engine 15</div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="prog0"></div></div>
+    <div class="progress-label" id="prog0lbl">0 of 0 done</div>
+  </div>
+  <div class="legend">
+    <div class="leg-item"><div class="leg-dot" style="background:var(--lime)"></div>Compound</div>
+    <div class="leg-item"><div class="leg-dot" style="background:var(--orange)"></div>Rehab</div>
+    <div class="leg-item"><div class="leg-dot" style="background:var(--gold)"></div>GK</div>
+    <div class="leg-item"><div class="leg-dot" style="background:var(--purple)"></div>Weak Point</div>
+    <div class="leg-item"><div class="leg-dot" style="background:var(--blue)"></div>Cardio</div>
+  </div>
+
+  <div class="sec">Warm-Up + Rehab — 8 min</div>
+  <div class="ex rehab" data-k="m-w1" onclick="toggleDone(this)"><div class="ex-num">W1</div><div class="ex-body"><div class="ex-name">Banded Ankle Eversion/Inversion + Alphabet</div><div class="ex-sub">Seated · pain-free range</div><div class="ex-sets">2 × 15/dir</div><div class="tags"><span class="tag t-rehab">Ankle Rehab</span></div></div></div>
+  <div class="ex rehab" data-k="m-w2" onclick="toggleDone(this)"><div class="ex-num">W2</div><div class="ex-body"><div class="ex-name">Single-Leg Balance (foam pad)</div><div class="ex-sub">Eyes open → closed to progress</div><div class="ex-sets">2 × 30s/side</div><div class="tags"><span class="tag t-rehab">Ankle Rehab</span></div></div></div>
+  <div class="ex rehab" data-k="m-w3" onclick="toggleDone(this)"><div class="ex-num">W3</div><div class="ex-body"><div class="ex-name">Wall Sit + Leg Swings</div><div class="ex-sub">Quad isometric primer · then dynamic swings</div><div class="ex-sets">2 × 40s + 10 swings</div><div class="tags"><span class="tag t-rehab">Quad Prep</span></div></div></div>
+
+  <div class="sec">Power + Plyo Block — 14 min</div>
+  <div class="ex gk-ex wa" data-k="m-p1a" onclick="toggleDone(this)"><div class="ex-num">P1</div><div class="ex-body"><div class="ex-name">Box Jump (step down)</div><div class="ex-sub">20–24" · land soft · full rest between sets — speed, never fatigue</div><div class="ex-sets">4 × 3</div><div class="tags"><span class="tag t-gk">Vertical Spring</span></div></div></div>
+  <div class="ex gk-ex wb" data-k="m-p1b" onclick="toggleDone(this)"><div class="ex-num">P1</div><div class="ex-body"><div class="ex-name">Depth Drop to Stick (12" box)</div><div class="ex-sub">Step off · absorb · freeze 2s · silent landings only</div><div class="ex-sets">4 × 3</div><div class="tags"><span class="tag t-wb">Block 2</span><span class="tag t-gk">Landing Armor</span></div></div></div>
+  <div class="ex gk-ex wa" data-k="m-p2a" onclick="toggleDone(this)"><div class="ex-num">P2</div><div class="ex-body"><div class="ex-name">Lateral Bound + Stick (skater)</div><div class="ex-sub">Land single-leg · hold 2s · start narrow, widen weekly</div><div class="ex-sets">3 × 3/side</div><div class="tags"><span class="tag t-gk">Dive Pattern</span></div></div></div>
+  <div class="ex gk-ex wb" data-k="m-p2b" onclick="toggleDone(this)"><div class="ex-num">P2</div><div class="ex-body"><div class="ex-name">Lateral Push-Off to Low Dive Shape</div><div class="ex-sub">Onto crash mat or grass · explode sideways from GK set · both sides</div><div class="ex-sets">3 × 3/side</div><div class="tags"><span class="tag t-wb">Block 2</span><span class="tag t-gk">Dive Pattern</span></div></div></div>
+  <div class="ex gk-ex" data-k="m-p3" onclick="toggleDone(this)"><div class="ex-num">P3</div><div class="ex-body"><div class="ex-name">Med-Ball Chest Pass from Knees → Pop to Feet</div><div class="ex-sub">10 lb ball · explode through the throw · mimics save-and-recover</div><div class="ex-sets">3 × 4</div><div class="tags"><span class="tag t-gk">Explosive</span></div></div></div>
+
+  <div class="sec">Main Block — 40 min</div>
+  <div class="ex compound weak-ex" data-k="m-a1" onclick="toggleDone(this)"><div class="ex-num">A1</div><div class="ex-body"><div class="ex-name">Back Squat</div><div class="ex-sub">Rebuilding — your 6/22 session was the bar. Add 10 lb/wk while pain-free · 3-sec descent · long-term goal: back past your old 195×6</div><div class="ex-sets">4 × 6 @ <span class="wt" data-w="95" onclick="editWt(event,this)">95 lb</span> · rest 2.5 min</div><div class="tags"><span class="tag t-compound">Compound</span><span class="tag t-weak">Weak Point #1</span><span class="tag t-fixed">Fixed — don't swap</span></div></div></div>
+  <div class="ex compound wa" data-k="m-b1a" onclick="toggleDone(this)"><div class="ex-num">B1</div><div class="ex-body"><div class="ex-name">Bulgarian Split Squat</div><div class="ex-sub">Left leg first · your last: 25s×8 · 3-sec lowering</div><div class="ex-sets">3 × 8/side @ <span class="wt" data-w="25" onclick="editWt(event,this)">25 lb</span> DBs</div><div class="tags"><span class="tag t-compound">Unilateral</span></div></div></div>
+  <div class="ex compound wb" data-k="m-b1b" onclick="toggleDone(this)"><div class="ex-num">B1</div><div class="ex-body"><div class="ex-name">DB Step-Up (knee-height box)</div><div class="ex-sub">Left first · control the way down — that's the quad rehab</div><div class="ex-sets">3 × 8/side @ <span class="wt" data-w="35" onclick="editWt(event,this)">35 lb</span> DBs</div><div class="tags"><span class="tag t-wb">Block 2</span><span class="tag t-compound">Unilateral</span></div></div></div>
+  <div class="ex wa" data-k="m-b2a" onclick="toggleDone(this)"><div class="ex-num">B2</div><div class="ex-body"><div class="ex-name">Leg Extension</div><div class="ex-sub">Pain-free arc only · builds quad tissue tolerance · your recent: 110×10</div><div class="ex-sets">3 × 12 @ <span class="wt" data-w="90" onclick="editWt(event,this)">90 lb</span></div><div class="tags"><span class="tag t-rehab">Quad Volume</span></div></div></div>
+  <div class="ex rehab wb" data-k="m-b2b" onclick="toggleDone(this)"><div class="ex-num">B2</div><div class="ex-body"><div class="ex-name">Spanish Squat (band-assisted)</div><div class="ex-sub">Band behind knees · vertical shin · tendon-friendly quad load</div><div class="ex-sets">3 × 12</div><div class="tags"><span class="tag t-wb">Block 2</span><span class="tag t-rehab">Quad Rehab</span></div></div></div>
+  <div class="ex rehab wa" data-k="m-c1a" onclick="toggleDone(this)"><div class="ex-num">C1</div><div class="ex-body"><div class="ex-name">Single-Leg Calf Raise (on step)</div><div class="ex-sub">3-sec lowering · full stretch at bottom</div><div class="ex-sets">3 × 12/side</div><div class="tags"><span class="tag t-rehab">Ankle Rehab</span></div></div></div>
+  <div class="ex wb" data-k="m-c1b" onclick="toggleDone(this)"><div class="ex-num">C1</div><div class="ex-body"><div class="ex-name">Calf Press (machine)</div><div class="ex-sub">Your recent: 210×10 · pause at stretch</div><div class="ex-sets">3 × 12 @ <span class="wt" data-w="210" onclick="editWt(event,this)">210 lb</span></div><div class="tags"><span class="tag t-wb">Block 2</span></div></div></div>
+  <div class="ex gk-ex wa" data-k="m-c2a" onclick="toggleDone(this)"><div class="ex-num">C2</div><div class="ex-body"><div class="ex-name">Copenhagen Adductor Plank</div><div class="ex-sub">Top foot on bench · groin injury insurance</div><div class="ex-sets">3 × 20s/side</div><div class="tags"><span class="tag t-gk">GK Pattern</span></div></div></div>
+  <div class="ex gk-ex wb" data-k="m-c2b" onclick="toggleDone(this)"><div class="ex-num">C2</div><div class="ex-body"><div class="ex-name">Lateral Band Walk (low stance)</div><div class="ex-sub">Stay in GK set position the whole way</div><div class="ex-sets">3 × 12/side</div><div class="tags"><span class="tag t-wb">Block 2</span><span class="tag t-gk">GK Pattern</span></div></div></div>
+
+  <div class="sec cardio">Cardio — The Hard Dose — 15 min</div>
+  <div class="cardio-block">
+    <div class="cb-title">⚡ Part 1 — Alactic: 10m Max Sprints</div>
+    <div class="cb-stats">
+      <div class="cb-stat">~10 sec ON</div>
+      <div class="cb-stat">50 sec REST</div>
+      <div class="cb-stat">6 reps</div>
+    </div>
+    <div class="cb-body"><strong>How:</strong> 10m max sprint, full stop, slow walk back. Pure explosive system — the dive-and-jump engine.<br><strong>Ankle option:</strong> bike sprints 6 × 10s hard / 50s easy.</div>
+  </div>
+  <div class="cardio-block" style="margin-top:8px;">
+    <div class="cb-title">🔥 Part 2 — VO2: Bike Intervals</div>
+    <div class="cb-stats">
+      <div class="cb-stat">45 sec HARD</div>
+      <div class="cb-stat">75 sec EASY</div>
+      <div class="cb-stat">4 rounds</div>
+    </div>
+    <div class="cb-body"><strong>How:</strong> 45s at an honest 8.5/10 effort, 75s easy spin. Add a round every 2 weeks, cap at 6.<br><strong>Why Monday:</strong> this is the week's ONLY high-intensity conditioning — placed a full 5 days from Saturday so it can't touch match freshness. Casual scrimmage never pushes you here; this is what actually raises the ceiling.</div>
+  </div>
+
+  <div class="reset-row"><button class="reset-btn" onclick="resetPanel('p0')">Reset Day</button></div>
+</div>
+
+<!-- ═══════════════ WEDNESDAY AM — UPPER A ═══════════════ -->
+<div class="panel" id="p1">
+  <div class="day-hdr">
+    <div class="day-title">Upper A — Heavy Push/Pull</div>
+    <div class="day-focus">Morning Lift · Zero Leg Work · 2h Training This Afternoon</div>
+    <div class="day-dur"><strong>~80 min</strong> · warm-up 6 · main 45 · GK hands 8 · Zone 2 spin 20</div>
+    <div class="day-warning">Finish eating 90+ min before afternoon training. If short on time, C2 is the first cut.</div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="prog1"></div></div>
+    <div class="progress-label" id="prog1lbl">0 of 0 done</div>
+  </div>
+
+  <div class="sec">Warm-Up — 6 min</div>
+  <div class="ex" data-k="w-w1" onclick="toggleDone(this)"><div class="ex-num">W1</div><div class="ex-body"><div class="ex-name">Band Pull-Aparts + Y-T-W Raises</div><div class="ex-sub">Light band · scap activation</div><div class="ex-sets">2 × 12</div></div></div>
+  <div class="ex" data-k="w-w2" onclick="toggleDone(this)"><div class="ex-num">W2</div><div class="ex-body"><div class="ex-name">Scap Push-Up + Arm Circles</div><div class="ex-sub">Then 2 ramp-up sets of A1</div><div class="ex-sets">2 × 10</div></div></div>
+
+  <div class="sec">Main Block — 45 min</div>
+  <div class="ex compound wa" data-k="w-a1a" onclick="toggleDone(this)"><div class="ex-num">A1</div><div class="ex-body"><div class="ex-name">Incline DB Press</div><div class="ex-sub">Your bread and butter — recent 70s×8. Push it: 75s for 6</div><div class="ex-sets">4 × 6 @ <span class="wt" data-w="75" onclick="editWt(event,this)">75 lb</span> DBs · rest 2.5 min</div><div class="tags"><span class="tag t-compound">Compound</span></div></div></div>
+  <div class="ex compound wb" data-k="w-a1b" onclick="toggleDone(this)"><div class="ex-num">A1</div><div class="ex-body"><div class="ex-name">Barbell Bench Press</div><div class="ex-sub">Old best 205×5 (July '25) — restart at 175 and rebuild</div><div class="ex-sets">4 × 5 @ <span class="wt" data-w="175" onclick="editWt(event,this)">175 lb</span></div><div class="tags"><span class="tag t-wb">Block 2</span><span class="tag t-compound">Compound</span></div></div></div>
+  <div class="ex compound wa" data-k="w-a2a" onclick="toggleDone(this)"><div class="ex-num">A2</div><div class="ex-body"><div class="ex-name">Weighted Pull-Up</div><div class="ex-sub">You've done BW×8 — add small plates now</div><div class="ex-sets">4 × 6 @ BW + <span class="wt" data-w="10" onclick="editWt(event,this)">10 lb</span></div><div class="tags"><span class="tag t-compound">Compound</span></div></div></div>
+  <div class="ex compound wb" data-k="w-a2b" onclick="toggleDone(this)"><div class="ex-num">A2</div><div class="ex-body"><div class="ex-name">Lat Pulldown</div><div class="ex-sub">Your recent: 140×10 · full stretch at top</div><div class="ex-sets">4 × 8 @ <span class="wt" data-w="140" onclick="editWt(event,this)">140 lb</span></div><div class="tags"><span class="tag t-wb">Block 2</span><span class="tag t-compound">Compound</span></div></div></div>
+  <div class="ex compound weak-ex wa" data-k="w-b1a" onclick="toggleDone(this)"><div class="ex-num">B1</div><div class="ex-body"><div class="ex-name">Barbell Overhead Press</div><div class="ex-sub">Barely in your history (best 95×8, over a year ago) — key for high claims</div><div class="ex-sets">3 × 8 @ <span class="wt" data-w="75" onclick="editWt(event,this)">75 lb</span></div><div class="tags"><span class="tag t-compound">Compound</span><span class="tag t-weak">Weak Point #3</span><span class="tag t-fixed">Fixed</span></div></div></div>
+  <div class="ex compound weak-ex wb" data-k="w-b1b" onclick="toggleDone(this)"><div class="ex-num">B1</div><div class="ex-body"><div class="ex-name">Half-Kneeling Landmine Press</div><div class="ex-sub">You hit 55×10 in June · shoulder-friendly overhead angle</div><div class="ex-sets">3 × 8/side @ <span class="wt" data-w="55" onclick="editWt(event,this)">55 lb</span></div><div class="tags"><span class="tag t-wb">Block 2</span><span class="tag t-weak">Weak Point #3</span></div></div></div>
+  <div class="ex wa" data-k="w-b2a" onclick="toggleDone(this)"><div class="ex-num">B2</div><div class="ex-body"><div class="ex-name">Cable Row</div><div class="ex-sub">Your recent: 140×8 · squeeze 1s at chest</div><div class="ex-sets">3 × 10 @ <span class="wt" data-w="140" onclick="editWt(event,this)">140 lb</span></div></div></div>
+  <div class="ex wb" data-k="w-b2b" onclick="toggleDone(this)"><div class="ex-num">B2</div><div class="ex-body"><div class="ex-name">Chest-Supported Row</div><div class="ex-sub">Hammerstrength iso — your recent 95×10</div><div class="ex-sets">3 × 10 @ <span class="wt" data-w="95" onclick="editWt(event,this)">95 lb</span></div><div class="tags"><span class="tag t-wb">Block 2</span></div></div></div>
+  <div class="ex weak-ex" data-k="w-c1" onclick="toggleDone(this)"><div class="ex-num">C1</div><div class="ex-body"><div class="ex-name">Pallof Press</div><div class="ex-sub">Anti-rotation — almost absent from 5 years of logs · resist the twist</div><div class="ex-sets">3 × 12/side @ light cable</div><div class="tags"><span class="tag t-core">Core</span><span class="tag t-weak">Weak Point #4</span><span class="tag t-fixed">Fixed</span></div></div></div>
+  <div class="ex" data-k="w-c2" onclick="toggleDone(this)"><div class="ex-num">C2</div><div class="ex-body"><div class="ex-name">DB Lateral Raise</div><div class="ex-sub">Your favorite — earned, not required</div><div class="ex-sets">2 × 12 @ <span class="wt" data-w="20" onclick="editWt(event,this)">20 lb</span></div><div class="tags"><span class="tag t-opt">Optional — cut if over time</span></div></div></div>
+
+  <div class="sec">GK Hands + Explosive Upper — 8 min</div>
+  <div class="ex gk-ex wa" data-k="w-g1a" onclick="toggleDone(this)"><div class="ex-num">G1</div><div class="ex-body"><div class="ex-name">Med-Ball Rotational Throw (wall)</div><div class="ex-sub">8–10 lb · hip drives the throw · distribution power</div><div class="ex-sets">3 × 5/side</div><div class="tags"><span class="tag t-gk">Distribution</span></div></div></div>
+  <div class="ex gk-ex wb" data-k="w-g1b" onclick="toggleDone(this)"><div class="ex-num">G1</div><div class="ex-body"><div class="ex-name">Med-Ball Overhead Slam</div><div class="ex-sub">Full extension overhead → violent slam · zero leg cost</div><div class="ex-sets">3 × 6</div><div class="tags"><span class="tag t-wb">Block 2</span><span class="tag t-gk">Explosive</span></div></div></div>
+  <div class="ex gk-ex" data-k="w-g2" onclick="toggleDone(this)"><div class="ex-num">G2</div><div class="ex-body"><div class="ex-name">Tennis-Ball Wall Reactions</div><div class="ex-sub">Throw, catch off the bounce, alternate hands · step closer to make it harder</div><div class="ex-sets">3 × 30s</div><div class="tags"><span class="tag t-gk">Reflex</span></div></div></div>
+
+  <div class="sec cardio">Cardio — Aerobic Base — 20 min</div>
+  <div class="cardio-block">
+    <div class="cb-title">○ Zone 2 Bike Spin</div>
+    <div class="cb-stats">
+      <div class="cb-stat">20 min steady</div>
+      <div class="cb-stat">HR ~130–145</div>
+      <div class="cb-stat">Conversational</div>
+    </div>
+    <div class="cb-body"><strong>How:</strong> straight onto the bike after the GK block. You should be able to speak full sentences the entire time — if you can't, you're going too hard and stealing from tonight's scrimmage.<br><strong>Why it's safe here:</strong> Zone 2 causes essentially no muscle damage and no interference with strength — it builds the aerobic base (heart stroke volume, mitochondria) that casual scrimmage is too stop-start to develop. Add 2–3 min per week, cap at 30.</div>
+  </div>
+
+  <div class="tip"><strong>Session flow:</strong> lift heavy, GK hands, easy spin, out the door. The morning should leave you energized, not emptied — if a barbell set feels like a grinder, rack it. Legs get zero loading before the afternoon scrimmage; the spin doesn't count, it's a flush.</div>
+
+  <div class="reset-row"><button class="reset-btn" onclick="resetPanel('p1')">Reset Day</button></div>
+</div>
+
+<!-- ═══════════════ THURSDAY — LOWER B ═══════════════ -->
+<div class="panel" id="p2">
+  <div class="day-hdr">
+    <div class="day-title">Lower B — Hinge + Unilateral</div>
+    <div class="day-focus">Posterior Chain · RPE-Capped · Games in 48h</div>
+    <div class="day-dur"><strong>~70 min</strong> · warm-up 8 · plyo 8 · main 45 · optional spin 10</div>
+    <div class="day-warning">Hard cap at RPE 7–8 (always 2 reps left in the tank). Plyo dose is deliberately tiny — ~24 crisp contacts primes Saturday legs without costing them.</div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="prog2"></div></div>
+    <div class="progress-label" id="prog2lbl">0 of 0 done</div>
+  </div>
+
+  <div class="sec">Warm-Up + Rehab — 8 min</div>
+  <div class="ex rehab" data-k="t-w1" onclick="toggleDone(this)"><div class="ex-num">W1</div><div class="ex-body"><div class="ex-name">Banded Clamshells + Hip Abduction</div><div class="ex-sub">Glute med wake-up · no ankle load</div><div class="ex-sets">2 × 15/side</div><div class="tags"><span class="tag t-rehab">Ankle-safe</span></div></div></div>
+  <div class="ex" data-k="t-w2" onclick="toggleDone(this)"><div class="ex-num">W2</div><div class="ex-body"><div class="ex-name">Glute Bridge Hold + Hip 90/90</div><div class="ex-sub">Controlled breathing · open the hips</div><div class="ex-sets">2 × 45s</div></div></div>
+  <div class="ex rehab" data-k="t-w3" onclick="toggleDone(this)"><div class="ex-num">W3</div><div class="ex-body"><div class="ex-name">Single-Leg Balance + Ankle Circles</div><div class="ex-sub">3x/week minimum for the ankle — this is #2</div><div class="ex-sets">2 × 30s/side</div><div class="tags"><span class="tag t-rehab">Ankle Rehab</span></div></div></div>
+
+  <div class="sec">Lateral Plyo — Low Dose — 8 min</div>
+  <div class="ex gk-ex wa" data-k="t-p1a" onclick="toggleDone(this)"><div class="ex-num">P1</div><div class="ex-body"><div class="ex-name">Low Lateral Hurdle Hops (6")</div><div class="ex-sub">Continuous, crisp contacts · quiet feet · full rest between sets</div><div class="ex-sets">3 × 4/side</div><div class="tags"><span class="tag t-gk">Lateral Spring</span></div></div></div>
+  <div class="ex gk-ex wb" data-k="t-p1b" onclick="toggleDone(this)"><div class="ex-num">P1</div><div class="ex-body"><div class="ex-name">Band-Resisted Lateral Shuffle → Release</div><div class="ex-sub">Anchored band · 3 loaded shuffles, release into explosive push-off</div><div class="ex-sets">3 × 4/side</div><div class="tags"><span class="tag t-wb">Block 2</span><span class="tag t-gk">Lateral Power</span></div></div></div>
+
+  <div class="sec">Main Block — 45 min</div>
+  <div class="ex compound weak-ex wa" data-k="t-a1a" onclick="toggleDone(this)"><div class="ex-num">A1</div><div class="ex-body"><div class="ex-name">Trap Bar Deadlift</div><div class="ex-sub">4 deadlift sessions in 5 years of logs — biggest gap in your hinge. Old conv. DL: 155×10</div><div class="ex-sets">4 × 5 @ <span class="wt" data-w="185" onclick="editWt(event,this)">185 lb</span> · rest 2.5 min</div><div class="tags"><span class="tag t-compound">Compound</span><span class="tag t-weak">Weak Point #2</span><span class="tag t-fixed">Fixed</span></div></div></div>
+  <div class="ex compound weak-ex wb" data-k="t-a1b" onclick="toggleDone(this)"><div class="ex-num">A1</div><div class="ex-body"><div class="ex-name">Barbell RDL</div><div class="ex-sub">Your 2024 log: 140×10 · hinge, don't squat it</div><div class="ex-sets">4 × 8 @ <span class="wt" data-w="135" onclick="editWt(event,this)">135 lb</span></div><div class="tags"><span class="tag t-wb">Block 2</span><span class="tag t-weak">Weak Point #2</span></div></div></div>
+  <div class="ex compound gk-ex wa" data-k="t-b1a" onclick="toggleDone(this)"><div class="ex-num">B1</div><div class="ex-body"><div class="ex-name">Barbell Hip Thrust</div><div class="ex-sub">Your Feb log: 120×10 · glute drive = dive power</div><div class="ex-sets">3 × 10 @ <span class="wt" data-w="135" onclick="editWt(event,this)">135 lb</span></div><div class="tags"><span class="tag t-compound">Compound</span><span class="tag t-gk">GK Jump Power</span></div></div></div>
+  <div class="ex compound gk-ex wb" data-k="t-b1b" onclick="toggleDone(this)"><div class="ex-num">B1</div><div class="ex-body"><div class="ex-name">Kettlebell Swing</div><div class="ex-sub">Explosive hip snap · power endurance</div><div class="ex-sets">4 × 12 @ <span class="wt" data-w="35" onclick="editWt(event,this)">35 lb</span></div><div class="tags"><span class="tag t-wb">Block 2</span><span class="tag t-gk">Hip Power</span></div></div></div>
+  <div class="ex compound" data-k="t-b2" onclick="toggleDone(this)"><div class="ex-num">B2</div><div class="ex-body"><div class="ex-name">Single-Leg RDL (left stance first)</div><div class="ex-sub">DB in opposite hand · doubles as ankle balance work · your best: 40×6</div><div class="ex-sets">3 × 8/side @ <span class="wt" data-w="30" onclick="editWt(event,this)">30 lb</span></div><div class="tags"><span class="tag t-compound">Unilateral</span><span class="tag t-fixed">Always kept</span></div></div></div>
+  <div class="ex wa" data-k="t-c1a" onclick="toggleDone(this)"><div class="ex-num">C1</div><div class="ex-body"><div class="ex-name">Seated Leg Curl</div><div class="ex-sub">Hamstring insurance for goal kicks + sprints</div><div class="ex-sets">3 × 10 @ <span class="wt" data-w="100" onclick="editWt(event,this)">100 lb</span></div></div></div>
+  <div class="ex rehab wb" data-k="t-c1b" onclick="toggleDone(this)"><div class="ex-num">C1</div><div class="ex-body"><div class="ex-name">Nordic Hamstring Curl (assisted)</div><div class="ex-sub">Slow eccentric only · gold standard hamstring protection</div><div class="ex-sets">3 × 5</div><div class="tags"><span class="tag t-wb">Block 2</span><span class="tag t-rehab">Eccentric</span></div></div></div>
+  <div class="ex rehab" data-k="t-c2" onclick="toggleDone(this)"><div class="ex-num">C2</div><div class="ex-body"><div class="ex-name">Tibialis Raise + Seated Calf Raise</div><div class="ex-sub">Superset · front + back of the ankle</div><div class="ex-sets">2 × 15 each</div><div class="tags"><span class="tag t-rehab">Ankle Rehab</span><span class="tag t-fixed">Fixed</span></div></div></div>
+  <div class="ex wa" data-k="t-d1a" onclick="toggleDone(this)"><div class="ex-num">D1</div><div class="ex-body"><div class="ex-name">Side Plank + Leg Lift</div><div class="ex-sub">Lateral core — controls your body mid-dive</div><div class="ex-sets">3 × 20s/side</div><div class="tags"><span class="tag t-core">Core</span></div></div></div>
+  <div class="ex wb" data-k="t-d1b" onclick="toggleDone(this)"><div class="ex-num">D1</div><div class="ex-body"><div class="ex-name">Dead Bug (DB held overhead)</div><div class="ex-sub">Lower back glued to floor</div><div class="ex-sets">3 × 10/side</div><div class="tags"><span class="tag t-wb">Block 2</span><span class="tag t-core">Core</span></div></div></div>
+
+  <div class="sec cardio">Optional — Aerobic Flush — 10 min</div>
+  <div class="cardio-block">
+    <div class="cb-title">○ Zone 2 Spin (Optional)</div>
+    <div class="cb-stats">
+      <div class="cb-stat">10 min easy</div>
+      <div class="cb-stat">Conversational</div>
+      <div class="cb-stat">Bike only</div>
+    </div>
+    <div class="cb-body"><strong>Take it if:</strong> legs feel heavy from Wednesday — an easy spin speeds recovery AND banks a little more aerobic volume.<br><strong>Skip it if:</strong> you feel fresh or time is tight. This is the last cardio of the week: nothing from Friday onward, so you arrive at Saturday's match with a full tank. That taper IS the fresh-legs plan.</div>
+  </div>
+
+  <div class="reset-row"><button class="reset-btn" onclick="resetPanel('p2')">Reset Day</button></div>
+</div>
+
+<!-- ═══════════════ FRIDAY AM — UPPER B ═══════════════ -->
+<div class="panel" id="p3">
+  <div class="day-hdr">
+    <div class="day-title">Upper B — Volume + Weak Points</div>
+    <div class="day-focus">Shortest Session · Training PM · Matches Tomorrow</div>
+    <div class="day-dur"><strong>~50 min</strong> · warm-up 5 · main 40 · no cardio</div>
+    <div class="day-warning">Nothing to failure today. Arms superset is the reward at the end — cut it first if time is short.</div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="prog3"></div></div>
+    <div class="progress-label" id="prog3lbl">0 of 0 done</div>
+  </div>
+
+  <div class="sec">Warm-Up — 5 min</div>
+  <div class="ex" data-k="f-w1" onclick="toggleDone(this)"><div class="ex-num">W1</div><div class="ex-body"><div class="ex-name">Band Pull-Aparts + Arm Circles</div><div class="ex-sub">Quick — then one ramp-up set of A1</div><div class="ex-sets">2 × 15</div></div></div>
+
+  <div class="sec">Main Block — 40 min</div>
+  <div class="ex compound wa" data-k="f-a1a" onclick="toggleDone(this)"><div class="ex-num">A1</div><div class="ex-body"><div class="ex-name">DB Shoulder Press</div><div class="ex-sub">Your recent: 40s×8 · seated, back supported</div><div class="ex-sets">3 × 8 @ <span class="wt" data-w="40" onclick="editWt(event,this)">40 lb</span> DBs</div><div class="tags"><span class="tag t-compound">Compound</span></div></div></div>
+  <div class="ex compound wb" data-k="f-a1b" onclick="toggleDone(this)"><div class="ex-num">A1</div><div class="ex-body"><div class="ex-name">Arnold Press</div><div class="ex-sub">Your log: 30s×10 · full rotation</div><div class="ex-sets">3 × 10 @ <span class="wt" data-w="30" onclick="editWt(event,this)">30 lb</span> DBs</div><div class="tags"><span class="tag t-wb">Block 2</span><span class="tag t-compound">Compound</span></div></div></div>
+  <div class="ex compound" data-k="f-a2" onclick="toggleDone(this)"><div class="ex-num">A2</div><div class="ex-body"><div class="ex-name">Single-Arm DB Row (left first)</div><div class="ex-sub">Your best: 75×7 · 1-sec squeeze at top · match right side to left's reps</div><div class="ex-sets">3 × 10/side @ <span class="wt" data-w="70" onclick="editWt(event,this)">70 lb</span></div><div class="tags"><span class="tag t-compound">Unilateral</span></div></div></div>
+  <div class="ex wa" data-k="f-b1a" onclick="toggleDone(this)"><div class="ex-num">B1</div><div class="ex-body"><div class="ex-name">Incline DB Press (volume)</div><div class="ex-sub">Lighter than Wednesday — smooth reps, no grinding</div><div class="ex-sets">3 × 10 @ <span class="wt" data-w="60" onclick="editWt(event,this)">60 lb</span> DBs</div></div></div>
+  <div class="ex wb" data-k="f-b1b" onclick="toggleDone(this)"><div class="ex-num">B1</div><div class="ex-body"><div class="ex-name">Dips (bodyweight)</div><div class="ex-sub">Your log: BW×12 · full depth, controlled</div><div class="ex-sets">3 × 10</div><div class="tags"><span class="tag t-wb">Block 2</span></div></div></div>
+  <div class="ex wa" data-k="f-b2a" onclick="toggleDone(this)"><div class="ex-num">B2</div><div class="ex-body"><div class="ex-name">Cable Face Pull</div><div class="ex-sub">Rear delts + rotator health — dive-landing armor</div><div class="ex-sets">3 × 15 @ <span class="wt" data-w="50" onclick="editWt(event,this)">50 lb</span></div></div></div>
+  <div class="ex wb" data-k="f-b2b" onclick="toggleDone(this)"><div class="ex-num">B2</div><div class="ex-body"><div class="ex-name">Seated Rear Delt Raise</div><div class="ex-sub">Your recent: 17.5s×8</div><div class="ex-sets">3 × 12 @ <span class="wt" data-w="17.5" onclick="editWt(event,this)">17.5 lb</span> DBs</div><div class="tags"><span class="tag t-wb">Block 2</span></div></div></div>
+  <div class="ex weak-ex" data-k="f-c1" onclick="toggleDone(this)"><div class="ex-num">C1</div><div class="ex-body"><div class="ex-name">Hanging Leg Raise</div><div class="ex-sub">Hip flexor + core strength for volley clearances and high knees</div><div class="ex-sets">3 × 10</div><div class="tags"><span class="tag t-core">Core</span><span class="tag t-weak">Weak Point #4</span></div></div></div>
+  <div class="ex wa" data-k="f-d1a" onclick="toggleDone(this)"><div class="ex-num">D1</div><div class="ex-body"><div class="ex-name">Arms Superset: EZ-Bar Curl + Rope Pushdown</div><div class="ex-sub">Your recents: curl 60×10, pushdown 60–65×8 · back-to-back, 60s rest</div><div class="ex-sets">3 rounds × 10 @ <span class="wt" data-w="60" onclick="editWt(event,this)">60 lb</span> each</div><div class="tags"><span class="tag t-opt">Optional — the fun part</span></div></div></div>
+  <div class="ex wb" data-k="f-d1b" onclick="toggleDone(this)"><div class="ex-num">D1</div><div class="ex-body"><div class="ex-name">Arms Superset: Hammer Curl + Overhead Rope Ext.</div><div class="ex-sub">Your recents: hammers 30s×8, overhead 57.5×8</div><div class="ex-sets">3 rounds × 10 @ <span class="wt" data-w="30" onclick="editWt(event,this)">30 lb</span> / <span class="wt" data-w="55" onclick="editWt(event,this)">55 lb</span></div><div class="tags"><span class="tag t-wb">Block 2</span><span class="tag t-opt">Optional</span></div></div></div>
+
+  <div class="tip"><strong>Weekend protocol:</strong> No gym, no cardio Sat/Sun — the 48h taper before matches is deliberate; that is where fresh legs come from. After Sunday's game: 10 min easy walk or spin, protein within 2h, and the ankle balance series (2 × 30s/side) while watching TV. Monday restarts the block.</div>
+
+  <div class="reset-row"><button class="reset-btn" onclick="resetPanel('p3')">Reset Day</button></div>
+</div>
+
+
+<!-- ═══════════════ GK PRIMER — BEFORE WED/FRI SCRIMMAGE ═══════════════ -->
+<div class="panel gk-panel" id="p4">
+  <div class="day-hdr">
+    <div class="day-title">GK Primer — Pre-Scrimmage</div>
+    <div class="day-focus">Run 15 min Before Wed/Fri Training · Your Trainings Don't Include This — So You Do</div>
+    <div class="day-dur"><strong>~15 min</strong> · on the pitch, before the session starts</div>
+    <div class="day-warning">This replaces standing around before scrimmage. Technique quality over volume — you still have 2 hours of play ahead.</div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="prog4"></div></div>
+    <div class="progress-label" id="prog4lbl">0 of 0 done</div>
+  </div>
+
+  <div class="sec">Activation — 4 min</div>
+  <div class="ex rehab" data-k="g-w1" onclick="toggleDone(this)"><div class="ex-num">W1</div><div class="ex-body"><div class="ex-name">Ankle Circles + Heel-Toe Walk</div><div class="ex-sub">On grass · 15m each · wakes the ankle before cutting</div><div class="ex-sets">2 × 15m</div><div class="tags"><span class="tag t-rehab">Ankle Prep</span></div></div></div>
+  <div class="ex gk-ex" data-k="g-w2" onclick="toggleDone(this)"><div class="ex-num">W2</div><div class="ex-body"><div class="ex-name">GK Set Position + Weight Shifts</div><div class="ex-sub">Low stance · soft knees · rock side to side, stay springy</div><div class="ex-sets">3 × 20s</div><div class="tags"><span class="tag t-gk">GK Pattern</span></div></div></div>
+
+  <div class="sec">Footwork — 4 min</div>
+  <div class="ex gk-ex wa" data-k="g-f1a" onclick="toggleDone(this)"><div class="ex-num">F1</div><div class="ex-body"><div class="ex-name">Shuffle–Plant–Reset Cone Drill</div><div class="ex-sub">4 cones × 1m apart · shuffle across, plant outside foot, return</div><div class="ex-sets">4 × 4/side</div><div class="tags"><span class="tag t-gk">Lateral Footwork</span></div></div></div>
+  <div class="ex gk-ex wb" data-k="g-f1b" onclick="toggleDone(this)"><div class="ex-num">F1</div><div class="ex-body"><div class="ex-name">Crossover Step + Drop Step Combo</div><div class="ex-sub">Cross to cone, drop-step back to angle · both directions</div><div class="ex-sets">4 × 3/side</div><div class="tags"><span class="tag t-wb">Block 2</span><span class="tag t-gk">Footwork</span></div></div></div>
+
+  <div class="sec">Diving — 5 min</div>
+  <div class="ex gk-ex wa" data-k="g-d1a" onclick="toggleDone(this)"><div class="ex-num">D1</div><div class="ex-body"><div class="ex-name">Self-Toss Low Dive</div><div class="ex-sub">Toss to the side · collapse dive · secure with two hands · both sides</div><div class="ex-sets">3 × 3/side</div><div class="tags"><span class="tag t-gk">Diving</span></div></div></div>
+  <div class="ex gk-ex wb" data-k="g-d1b" onclick="toggleDone(this)"><div class="ex-num">D1</div><div class="ex-body"><div class="ex-name">Power Step → Mid-Height Dive</div><div class="ex-sub">One explosive lateral step into a full dive · dry or self-toss</div><div class="ex-sets">3 × 3/side</div><div class="tags"><span class="tag t-wb">Block 2</span><span class="tag t-gk">Dive Power</span></div></div></div>
+  <div class="ex gk-ex" data-k="g-d2" onclick="toggleDone(this)"><div class="ex-num">D2</div><div class="ex-body"><div class="ex-name">Save → Up → Save (get-up chain)</div><div class="ex-sub">Dive, recover to set in under 2s, dive opposite side · match realism</div><div class="ex-sets">2 × 3 chains</div><div class="tags"><span class="tag t-gk">Recovery Speed</span></div></div></div>
+
+  <div class="sec">Hands — 2 min</div>
+  <div class="ex gk-ex" data-k="g-h1" onclick="toggleDone(this)"><div class="ex-num">H1</div><div class="ex-body"><div class="ex-name">Rapid-Fire Wall Catches</div><div class="ex-sub">Ball or tennis ball off a wall/partner · catch clean, W-shape hands</div><div class="ex-sets">2 × 30s</div><div class="tags"><span class="tag t-gk">Reflex</span></div></div></div>
+
+  <div class="tip"><strong>Why this exists:</strong> your team sessions are scrimmage-heavy, which builds game reading but never isolates footwork, diving mechanics, or reactions. Fifteen structured minutes twice a week fills exactly that gap — and doubles as the best possible warm-up for going in goal. If a teammate can serve balls for D1/H1, even better.</div>
+
+  <div class="reset-row"><button class="reset-btn" onclick="resetPanel('p4')">Reset Day</button></div>
+</div>
+
+<!-- ═══════════════ PLAN / INFO ═══════════════ -->
+<div class="panel" id="p5">
+  <div class="plan-sec-title">Weakness Report — Fitbod × InBody</div>
+  <div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:10px;">Cross-referencing 582 logged sessions (2021–2026) against your March InBody scan. Purple-tagged exercises in the plan target these directly.</div>
+
+  <div class="weak-card">
+    <div class="weak-rank">Weak Point #1 · Severity: High</div>
+    <div class="weak-name">Lower-Body Strength</div>
+    <div class="weak-evidence">Evidence: legs appear in only a small fraction of your sessions, and mostly light. InBody legs at 108–110% of ideal vs arms at 123–127%. Squat rebuilt from the empty bar on 6/22 post-injury.</div>
+    <div class="weak-fix"><strong>Fix:</strong> Two protected lower days (Mon + Thu). Squat +10 lb/wk. First InBody target: legs ≥ 115%.</div>
+  </div>
+  <div class="weak-card">
+    <div class="weak-rank">Weak Point #2 · Severity: High</div>
+    <div class="weak-name">Hip Hinge Pattern</div>
+    <div class="weak-evidence">Evidence: 4 conventional deadlift sessions in 5 years. RDLs occasional and light relative to your pressing strength.</div>
+    <div class="weak-fix"><strong>Fix:</strong> Thursday A1 is always a hinge. Trap bar deadlift for Block 1, barbell RDL for Block 2.</div>
+  </div>
+  <div class="weak-card">
+    <div class="weak-rank">Weak Point #3 · Severity: Medium</div>
+    <div class="weak-name">Overhead Pressing</div>
+    <div class="weak-evidence">Evidence: barbell OHP best of 95×8, last trained over a year ago — far below your horizontal press (incline 195×6). Keepers live overhead.</div>
+    <div class="weak-fix"><strong>Fix:</strong> Wednesday B1, fixed slot. Barbell OHP in Block 1, landmine press in Block 2.</div>
+  </div>
+  <div class="weak-card">
+    <div class="weak-rank">Weak Point #4 · Severity: Medium</div>
+    <div class="weak-name">Anti-Rotation Core + Hip Flexors</div>
+    <div class="weak-evidence">Evidence: core history is nearly all crunches/sit-ups (spinal flexion). Almost zero anti-rotation or carry work — the patterns that hold your shape mid-dive.</div>
+    <div class="weak-fix"><strong>Fix:</strong> Pallof press (Wed), side plank/dead bug (Thu), hanging leg raise (Fri).</div>
+  </div>
+  <div class="weak-card">
+    <div class="weak-rank">Weak Point #5 · Severity: Ongoing</div>
+    <div class="weak-name">Ankle + Quad Resilience</div>
+    <div class="weak-evidence">Evidence: injury history plus sporadic calf/tibialis work in the logs.</div>
+    <div class="weak-fix"><strong>Fix:</strong> Orange rehab items on every gym day, balance work 3x/week, calves twice weekly. Never cut for time.</div>
+  </div>
+  <div class="weak-card">
+    <div class="weak-rank">Weak Point #6 · Severity: Self-Reported + Confirmed</div>
+    <div class="weak-name">Aerobic Engine</div>
+    <div class="weak-evidence">Evidence: your own assessment, backed by the logs — 24 running sessions in 5 years, no interval work. Casual scrimmage is stop-start at low average intensity: it maintains fitness but never overloads the aerobic system, which is why playing 5–6x/week hasn't fixed this.</div>
+    <div class="weak-fix"><strong>Fix:</strong> A polarized week — two easy Zone 2 doses (Tue 30 min, Wed 20 min post-lift) plus one hard dose (Mon VO2 intervals). Hard stuff lives 5 days from match day; nothing after Thursday. Progress: +2–3 min/wk on Z2, +1 interval round every 2 wks.</div>
+  </div>
+  <div class="weak-card strength-card">
+    <div class="weak-rank">Strengths — Maintain, Don't Chase</div>
+    <div class="weak-name">Horizontal Press · Vertical Pull · Arms</div>
+    <div class="weak-evidence">Incline bench 195×6, DB incline 70s×8, lat pulldown 150×6, cable row 140×8, and years of consistent arm volume. These are kept at maintenance doses so the recovery budget goes to the weak points above.</div>
+  </div>
+
+  <div class="plan-sec-title">Why The Week Looks Like This</div>
+  <ul class="rule-list">
+    <li><strong>Monday is the heaviest day</strong> — it's your only gym day not followed by serious field work (Tuesday's 7v7 is casual).</li>
+    <li><strong>Wed/Fri mornings are upper-only</strong> — pressing and pulling won't steal from afternoon training legs. Lift ends 4+ hours before training.</li>
+    <li><strong>Thursday is RPE-capped</strong> — heavy enough to drive the hinge weakness, controlled enough that Saturday's match legs survive. Never chase a PR here.</li>
+    <li><strong>The cardio system is polarized</strong> — mostly easy, occasionally hard, nothing in between. Zone 2 (Tue 30', Wed 20') builds the engine with zero interference to strength or soreness cost. The single HIIT dose (Mon) raises the ceiling and sits 5 days from Saturday. Scrimmage intensity is left as-is — it's skill practice, not conditioning. Fri–Sun is a hard taper: fresh legs are programmed, not hoped for.</li>
+    <li><strong>Plyos + GK work are structured, not skipped</strong> — since team sessions are scrimmage-heavy, the isolated jump/dive/reaction work lives here: Monday power block (~35 contacts), Thursday lateral dose (~24 contacts), Wednesday hands block, and the 15-min GK Primer before Wed/Fri training. Total weekly jump contacts stay ≤ ~70 while the ankle rebuilds.</li>
+  </ul>
+
+  <div class="plan-sec-title">Operating Rules</div>
+  <ul class="rule-list">
+    <li><strong>Progression:</strong> when you hit all target reps with 2 in reserve, add 10 lb (lower) or 5 lb (upper) next time — then tap the chip and update your target.</li>
+    <li><strong>Blocks, not weekly rotation:</strong> run Block 1 for 4 straight weeks, adding load each week — repeating the same lifts weekly is what drives strength and technique, especially on your rebuilding lifts. Deload week 5, then switch to Block 2 for weeks 6–9, deload week 10, retest InBody. Fixed-tagged slots never change across blocks.</li>
+    <li><strong>Deload:</strong> week 5 and week 10 (the block boundaries) — half the sets at the same weights, skip Monday sprints. If you played 3+ matches in a week, pull the deload forward.</li>
+    <li><strong>Time-cap rule:</strong> running long? Cut in this order: Optional-tagged → D items → C items. Never cut A/B compounds or orange rehab.</li>
+    <li><strong>Cardio rules:</strong> always bike over running while the ankle rebuilds. Zone 2 means conversational — going "medium" on easy days is the classic way to wreck both recovery and the strength work. If a lift session must be cut short, the barbell work survives and the spin dies.</li>
+    <li><strong>Match-week adjustment:</strong> tournament weekend coming? Skip Thursday's barbell work, keep the rehab + core only.</li>
+    <li><strong>Red flags:</strong> sharp quad pain on eccentrics, ankle giving way on landings, or swelling next morning → stop loading, see a physio. General guidance here isn't a substitute for one.</li>
+    <li><strong>Re-test:</strong> InBody at 10–12 weeks. Success = legs ≥115% of ideal, L/R leg gap under 2 points, weight stable or slightly up.</li>
+  </ul>
+
+  <div class="tip"><strong>Fuel note:</strong> With this combined gym + field load you're likely burning 3,000+ kcal on double days. Eating at your old maintenance will slowly dig a hole — target ~2,800–3,000 kcal and 140–175 g protein on training days.</div>
+</div>
+
+<script>
+  // ── storage (guarded: persists on GitHub Pages, degrades gracefully elsewhere) ──
+  function store(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function read(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function removeKey(k) { try { localStorage.removeItem(k); } catch (e) {} }
+
+  // ── Tab switching ──
+  function switchTab(idx) {
+    var tabs = document.querySelectorAll('.tab');
+    var panels = document.querySelectorAll('.panel');
+    for (var i = 0; i < tabs.length; i++) {
+      tabs[i].classList.toggle('active', i === idx);
+      panels[i].classList.toggle('active', i === idx);
+    }
+    updateProgress('p' + idx);
+  }
+
+  // ── Week toggle ──
+  function setWeek(w) {
+    var btnA = document.getElementById('btnA');
+    var btnB = document.getElementById('btnB');
+    var note = document.getElementById('weekNote');
+    if (w === 'a') {
+      document.body.classList.remove('weekb');
+      btnA.className = 'week-btn on-a';
+      btnB.className = 'week-btn';
+      note.textContent = 'Weeks 1\u20134 \u00b7 deload wk 5 \u00b7 then switch';
+    } else {
+      document.body.classList.add('weekb');
+      btnA.className = 'week-btn';
+      btnB.className = 'week-btn on-b';
+      note.textContent = 'Weeks 6\u20139 \u00b7 deload wk 10 \u00b7 retest InBody';
+    }
+    store('kb2_week', w);
+    for (var i = 0; i < 5; i++) updateProgress('p' + i);
+  }
+
+  // ── Editable weight chips ──
+  function editWt(evt, el) {
+    evt.stopPropagation();
+    var current = el.getAttribute('data-w');
+    var input = prompt('Set target weight (lb):', current);
+    if (input === null) return;
+    var val = parseFloat(input);
+    if (isNaN(val) || val < 0) return;
+    el.setAttribute('data-w', val);
+    el.textContent = val + ' lb';
+    var key = findKey(el);
+    if (key) store('kb2_wt_' + key, String(val));
+  }
+  function findKey(chip) {
+    var ex = chip.closest('.ex');
+    if (!ex) return null;
+    var base = ex.getAttribute('data-k');
+    // multiple chips in one row get an index suffix
+    var chips = ex.querySelectorAll('.wt');
+    for (var i = 0; i < chips.length; i++) {
+      if (chips[i] === chip) return chips.length > 1 ? base + '_' + i : base;
+    }
+    return base;
+  }
+
+  // ── Check off exercises ──
+  function toggleDone(el) {
+    el.classList.toggle('done');
+    var key = el.getAttribute('data-k');
+    if (key) {
+      if (el.classList.contains('done')) store('kb2_done_' + key, '1');
+      else removeKey('kb2_done_' + key);
+    }
+    var panel = el.closest('.panel');
+    if (panel) updateProgress(panel.id);
+  }
+
+  function updateProgress(panelId) {
+    var panel = document.getElementById(panelId);
+    if (!panel) return;
+    var isWeekB = document.body.classList.contains('weekb');
+    var allEx = panel.querySelectorAll('.ex');
+    var visible = [];
+    for (var i = 0; i < allEx.length; i++) {
+      var el = allEx[i];
+      if (isWeekB) { if (el.classList.contains('wa')) continue; }
+      else { if (el.classList.contains('wb')) continue; }
+      visible.push(el);
+    }
+    var done = 0;
+    for (var j = 0; j < visible.length; j++) if (visible[j].classList.contains('done')) done++;
+    var total = visible.length;
+    var pct = total > 0 ? Math.round((done / total) * 100) : 0;
+    var fill = document.getElementById('prog' + panelId.replace('p', ''));
+    var lbl = document.getElementById('prog' + panelId.replace('p', '') + 'lbl');
+    if (fill) {
+      fill.style.width = pct + '%';
+      fill.style.background = (pct === 100 && total > 0) ? 'var(--gold)' : 'var(--lime)';
+    }
+    if (lbl) lbl.textContent = done + ' of ' + total + ' done';
+  }
+
+  function resetPanel(panelId) {
+    var panel = document.getElementById(panelId);
+    if (!panel) return;
+    var exs = panel.querySelectorAll('.ex.done');
+    for (var i = 0; i < exs.length; i++) {
+      exs[i].classList.remove('done');
+      var key = exs[i].getAttribute('data-k');
+      if (key) removeKey('kb2_done_' + key);
+    }
+    updateProgress(panelId);
+  }
+
+  // ── Restore saved state ──
+  (function init() {
+    // week
+    var w = read('kb2_week');
+    if (w === 'b') setWeek('b');
+    // weights
+    var allEx = document.querySelectorAll('.ex');
+    for (var i = 0; i < allEx.length; i++) {
+      var ex = allEx[i];
+      var base = ex.getAttribute('data-k');
+      if (!base) continue;
+      // done state
+      if (read('kb2_done_' + base) === '1') ex.classList.add('done');
+      // weight chips
+      var chips = ex.querySelectorAll('.wt');
+      for (var c = 0; c < chips.length; c++) {
+        var key = chips.length > 1 ? base + '_' + c : base;
+        var saved = read('kb2_wt_' + key);
+        if (saved !== null) {
+          chips[c].setAttribute('data-w', saved);
+          chips[c].textContent = saved + ' lb';
+        }
+      }
+    }
+    for (var p = 0; p < 5; p++) updateProgress('p' + p);
+  })();
+</script>
+</body>
+</html>
